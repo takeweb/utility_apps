@@ -21,4 +21,9 @@ uv sync
 streamlit run main.py
 ```
 
+## Streamlit Community Cloudにデプロイする為に、requirements.txtを生成
+```
+uv export --format 'requirements-txt' > requirements.txt
+```
+
 以上
