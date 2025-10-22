@@ -1,1 +1,24 @@
 # utility_apps
+
+## 仮想環境を作成(最初だけ)
+```
+uv init
+uv add streamlit
+```
+
+## 仮想環境へ入る
+```
+source .venv/bin/activate
+```
+
+## 仮想環境内にpyproject.tomlに書かれている依存関係全てを適用(最初だけ)
+```
+uv sync
+```
+
+## 実行
+```
+streamlit run main.py
+```
+
+以上
