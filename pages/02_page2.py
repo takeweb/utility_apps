@@ -5,9 +5,10 @@ from datetime import date, datetime
 
 def get_formatted_date(input_str):
     try:
+        normalized_input_str = input_str.replace("-", "/")
         # 入力された文字列を「%Y/%m/%d」形式で日付オブジェクトに変換
         # ここで形式が異なると ValueError が発生します
-        date_object = datetime.strptime(input_str, "%Y/%m/%d")
+        date_object = datetime.strptime(normalized_input_str, "%Y/%m/%d")
 
         # B. 変換された日付オブジェクトを目的の「YYYY-MM-DD」形式の文字列に変換
         return date_object.strftime("%Y-%m-%d")
@@ -48,7 +49,7 @@ def main():
 
     # st.text_inputでユーザー入力を受け付ける
     input_str = st.text_input(
-        "日付を入力 (形式: yyyy/mm/dd)",
+        "日付を入力 (形式: yyyy/mm/dd or yyyy-mm-dd)",
         value=date.today().strftime("%Y/%m/%d"),
         placeholder="例: 2025/10/23"
     )
@@ -83,11 +84,14 @@ def main():
         gengo_map = {d['gengo']: d for d in wareki_data}
         gengo_options = list(gengo_map.keys())
 
+        # 最後の要素のインデックスは (長さ - 1)
+        default_index_gengo = len(gengo_options) - 1
+
         col1, col2 = st.columns(2)
 
         with col1:
             # 1. 元号のセレクトボックス
-            selected_gengo = st.selectbox("元号を選択", gengo_options)
+            selected_gengo = st.selectbox("元号を選択", gengo_options, index=default_index_gengo)
 
         # 選択された元号の情報と期間から和暦年リストを生成
         era_info = gengo_map.get(selected_gengo)
@@ -115,15 +119,15 @@ def main():
                 else:
                     wareki_year_options.append(f"{year}年")
 
-            # 初期値を1年（元年）に設定
-            default_index = 0
+            # 和暦年の選択肢リストの長さを取得し、最後の要素のインデックスを設定
+            default_index_wareki = len(wareki_year_options) - 1
 
             with col2:
                 # 2. 和暦年のセレクトボックス
                 selected_wareki_str = st.selectbox(
                     f"{selected_gengo} の年を選択",
                     wareki_year_options,
-                    index=default_index
+                    index=default_index_wareki
                 )
 
             # 3. 西暦への変換ロジック
