@@ -1,24 +1,45 @@
 import streamlit as st
 from libs.supabase_client import get_supabase_client
-from datetime import date
+from datetime import date, datetime
 
 def main():
     st.title("西暦→和暦変換")
 
-    # input_date = st.text_input("日付を入力 (例: 2024-03-15)")
-    selected_date = st.date_input("日付を選択", value=date.today())
+    # 今日の日付を「yyyy/mm/dd」形式の文字列として初期値に設定
+    default_date_str = date.today().strftime("%Y/%m/%d")
 
-    # 「YYYY-MM-DD」形式に変換
-    input_date = selected_date.strftime("%Y-%m-%d")
+    # 1. st.text_inputでユーザー入力を受け付ける
+    input_str = st.text_input(
+        "日付を入力 (形式: yyyy/mm/dd)",
+        value=default_date_str,
+        placeholder="例: 2025/10/23"
+    )
 
-    if st.button("取得↓↓"):
-        if not input_date:
-            st.warning("日付を入力してください。")
-            return
+    # 処理結果を格納するための変数
+    formatted_date = None
 
+    # 2. 入力値のバリデーションと変換のロジック
+    if input_str:
+        try:
+            # A. 入力された文字列を「%Y/%m/%d」形式で日付オブジェクトに変換
+            #    ここで形式が異なると ValueError が発生します
+            date_object = datetime.strptime(input_str, "%Y/%m/%d")
+
+            # B. 変換された日付オブジェクトを目的の「YYYY-MM-DD」形式の文字列に変換
+            formatted_date = date_object.strftime("%Y-%m-%d")
+
+        except ValueError:
+            # 形式が一致しない場合のエラー処理
+            st.error("入力された日付の形式が「YYYY/MM/DD」と異なります。ご確認ください。")
+
+    else:
+        # 入力フィールドが空の場合の処理
+        st.warning("日付を入力してください。")
+
+    if st.button("↓↓変換↓↓"):
         supabase = get_supabase_client()
         try:
-            res = supabase.rpc("get_era_date", {"seireki_date": input_date}).execute()
+            res = supabase.rpc("get_era_date", {"seireki_date": formatted_date}).execute()
 
             # res.data が None の場合、res.response から直接取得を試みる
             data = None
