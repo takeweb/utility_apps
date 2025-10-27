@@ -11,6 +11,8 @@ def convert_seireki_2_wareki(supabase: Client, year: int, month: int, day: int):
     try:
         target_date = datetime(year, month, day).strftime("%Y-%m-%d")
         res = supabase.rpc("get_era_date", {"seireki_date": target_date}).execute()
+
+        # 修正: Supabase RPC が和暦文字列を直接返すケースを想定
         if res.data:
             return res.data
 
@@ -40,9 +42,9 @@ def convert_wareki_2_seireki(start_seireki_year: int, wareki_year_str: str, mont
     except ValueError:
         return "存在する正しい日付を入力してください"
 
-def create_wareki_year_options(era_info: dict) -> tuple[list[str], int]:
+def create_wareki_year_options(era_info: dict) -> tuple[list[str], int, date]:
     """
-    元号情報から和暦年の選択肢リスト（文字列）とデフォルトインデックスを生成します。
+    元号情報から和暦年の選択肢リスト（文字列）、デフォルトインデックス、開始日を生成します。
     """
     start_date_obj = datetime.strptime(era_info['start_date'], '%Y-%m-%d').date()
 
@@ -55,7 +57,6 @@ def create_wareki_year_options(era_info: dict) -> tuple[list[str], int]:
     # 和暦年数の計算 (西暦終了年 - 西暦開始年 + 1)
     wareki_years_count = end_date_obj.year - start_date_obj.year + 1
 
-    # 和暦年の選択肢リストを生成（文字列に変換し、1を「元年」に置き換える）
     wareki_year_options = []
     for year in range(1, wareki_years_count + 1):
         if year == 1:
@@ -63,10 +64,9 @@ def create_wareki_year_options(era_info: dict) -> tuple[list[str], int]:
         else:
             wareki_year_options.append(f"{year}年")
 
-    # リストの最後の要素をデフォルトインデックスに設定
     default_index = len(wareki_year_options) - 1
 
-    return wareki_year_options, default_index
+    return wareki_year_options, default_index, start_date_obj
 
 @st.cache_data(ttl=3600) # 1時間データをキャッシュ
 def fetch_wareki_data(_supabase: Client):
@@ -85,6 +85,7 @@ def fetch_wareki_data(_supabase: Client):
 # --- Streamlit アプリ本体 ---
 
 def display_streamlit_app():
+    # Supabaseクライアントの初期化 (環境に合わせて調整してください)
     supabase_client = get_supabase_client()
 
     # 元号データを取得
@@ -101,54 +102,50 @@ def display_streamlit_app():
     # --------------------------------------------------------------------------
     ## 西暦から和暦への変換
     # --------------------------------------------------------------------------
-    st.header("西暦から和暦への変換")
-
-    with st.form("wareki_form"):
+    with st.expander("西暦から和暦への変換", expanded=True):
         cols = st.columns(3, gap="small", width="stretch")
         with cols[0]:
-            # 和暦が存在する範囲（明治以降）に限定
             year = st.selectbox("年 (西暦)", options=list(range(today.year, 1860, -1)), index=0, key="seireki_year")
         with cols[1]:
             month = st.selectbox("月", options=list(range(1, 13)), index=today.month - 1, key="seireki_month")
         with cols[2]:
             day = st.selectbox("日", options=list(range(1, 32)), index=today.day - 1, key="seireki_day")
 
-        submitted1 = st.form_submit_button("和暦に変換")
+        submitted1 = st.button("和暦に変換", key="convert_seireki_2_wareki_btn")
 
-    # 結果表示
-    if submitted1:
-        wareki_result = convert_seireki_2_wareki(supabase_client, int(year), int(month), int(day))
-        if "正しい日付" in wareki_result or "見つかりません" in wareki_result:
-            st.error(wareki_result)
-        else:
-            st.success(f"和暦: {wareki_result}")
+        # 結果表示
+        if submitted1:
+            wareki_result = convert_seireki_2_wareki(supabase_client, int(year), int(month), int(day))
+            if "正しい日付" in wareki_result or "見つかりません" in wareki_result:
+                st.error(wareki_result)
+            elif "変換エラー" in wareki_result:
+                st.exception(wareki_result)
+            else:
+                st.success(f"和暦: {wareki_result}")
+
 
     # --------------------------------------------------------------------------
     ## 和暦から西暦への変換
     # --------------------------------------------------------------------------
-    st.header("和暦から西暦への変換")
-
-    with st.form("seireki_form"):
+     # フォームの制約を外し、コンボの変更で即座に連動させる
+    with st.expander("和暦から西暦への変換", expanded=True):
         cols = st.columns(4, gap="small", width="stretch")
 
-        # 1. 元号のセレクトボックス
+        # 1. 元号のセレクトボックス (変更時に即時再実行)
         with cols[0]:
-             # key を追加して、他のセレクトボックスと区別
              selected_gengo = st.selectbox("元号を選択", gengo_options, index=default_index_gengo, key="gengo_select_2")
 
-        # 2. 和暦年の計算
+        # 2. 和暦年の計算 (selected_gengo に基づいて連動)
         wareki_year_options = ["---"]
         default_index_wareki = 0
         start_date_obj = None
 
         era_info = gengo_map.get(selected_gengo)
         if era_info:
-            wareki_year_options, default_index_wareki = create_wareki_year_options(era_info)
-            start_date_obj = datetime.strptime(era_info['start_date'], '%Y-%m-%d').date()
+            wareki_year_options, default_index_wareki, start_date_obj = create_wareki_year_options(era_info)
 
         with cols[1]:
-            # 和暦年のセレクトボックス
-            # 注意: フォーム内にあるため、元号を変更してもリストは更新されません。
+            # 和暦年のセレクトボックス (optionsがリアルタイムで更新される)
             selected_wareki_str = st.selectbox(
                 f"{selected_gengo} の年を選択",
                 wareki_year_options,
@@ -161,15 +158,20 @@ def display_streamlit_app():
         with cols[3]:
             day2 = st.selectbox("日", options=list(range(1, 32)), index=today.day - 1, key="wareki_day_2")
 
-        submitted2 = st.form_submit_button("西暦に変換")
+        # st.button に変更 (押された時のみ処理を実行)
+        submitted2 = st.button("西暦に変換", key="convert_wareki_2_seireki_btn")
 
-    # 結果表示
-    if submitted2:
-        if start_date_obj:
-            result = convert_wareki_2_seireki(start_date_obj.year, selected_wareki_str, int(month2), int(day2))
-            if "正しい日付" in result:
-                st.error(result)
+        # 結果表示
+        if submitted2:
+            if start_date_obj:
+                # ユーザーが「---」を選択している可能性を排除
+                if selected_wareki_str == "---":
+                    st.error("年を選択してください。")
+                else:
+                    result = convert_wareki_2_seireki(start_date_obj.year, selected_wareki_str, int(month2), int(day2))
+                    if "正しい日付" in result:
+                        st.error(result)
+                    else:
+                        st.success(f"西暦: {result}")
             else:
-                st.success(f"西暦: {result}")
-        else:
-            st.error("元号データが取得できませんでした。")
+                st.error("元号データが取得できませんでした。")
