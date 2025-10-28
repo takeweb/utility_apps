@@ -3,17 +3,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 from datetime import datetime
 import time
+import locale
 
-def load_css(file_name):
-    """CSSファイルを読み込み、st.markdownでアプリに挿入する関数"""
-    try:
-        with open(file_name, "r") as f:
-            st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
-    except FileNotFoundError:
-        st.error(f"Error: CSS file '{file_name}' not found.")
-
-# 時計を描画する関数
 def plot_clock():
+    """
+    時計を描画する関数
+    """
     now = datetime.now()
     second = now.second
     minute = now.minute + second / 60.0
@@ -53,16 +48,22 @@ def plot_clock():
             color='red', linewidth=2, label='Second')
     return fig
 
+def print_date():
+    locale.setlocale(locale.LC_TIME, 'ja_JP.UTF-8')
+    today = datetime.today()
+
+    # strftime()メソッドを使って日付と曜日をフォーマット
+    # %Y: 年、%m: 月、%d: 日、%A: 完全な曜日名
+    formatted_date_ja = today.strftime("%Y年%m月%d日(%a)")
+    st.write(formatted_date_ja)
+
 def draw_clock():
     """
     Streamlit上にアナログ時計を表示する。
     """
     st.title("時計アプリ")
 
-    # # CSSファイルをロードして適用
-    # load_css("style.css")
-
-    # st.markdown('<h1 class="center-title">アナログ時計</h1>', unsafe_allow_html=True)
+    print_date()
 
     # 時計をリアルタイムで更新
     placeholder1 = st.empty()

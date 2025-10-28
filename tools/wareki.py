@@ -1,4 +1,5 @@
 from datetime import datetime, date
+import calendar
 import streamlit as st
 from supabase import Client
 from libs.supabase_client import get_supabase_client
@@ -85,7 +86,7 @@ def fetch_wareki_data(_supabase: Client):
 # --- Streamlit アプリ本体 ---
 
 def display_streamlit_app():
-    # Supabaseクライアントの初期化 (環境に合わせて調整してください)
+    # Supabaseクライアントの初期化
     supabase_client = get_supabase_client()
 
     # 元号データを取得
@@ -109,7 +110,8 @@ def display_streamlit_app():
         with cols[1]:
             month = st.selectbox("月", options=list(range(1, 13)), index=today.month - 1, key="seireki_month")
         with cols[2]:
-            day = st.selectbox("日", options=list(range(1, 32)), index=today.day - 1, key="seireki_day")
+            last_day = calendar.monthrange(year, month)[1]
+            day = st.selectbox("日", options=list(range(1, last_day + 1)), index=today.day - 1, key="seireki_day")
 
         submitted1 = st.button("和暦に変換", key="convert_seireki_2_wareki_btn")
 
@@ -123,7 +125,6 @@ def display_streamlit_app():
             else:
                 st.success(f"和暦: {wareki_result}")
 
-
     # --------------------------------------------------------------------------
     ## 和暦から西暦への変換
     # --------------------------------------------------------------------------
@@ -131,11 +132,11 @@ def display_streamlit_app():
     with st.expander("和暦から西暦への変換", expanded=True):
         cols = st.columns(4, gap="small", width="stretch")
 
-        # 1. 元号のセレクトボックス (変更時に即時再実行)
+        # 元号のセレクトボックス (変更時に即時再実行)
         with cols[0]:
              selected_gengo = st.selectbox("元号を選択", gengo_options, index=default_index_gengo, key="gengo_select_2")
 
-        # 2. 和暦年の計算 (selected_gengo に基づいて連動)
+        # 和暦年の計算 (selected_gengo に基づいて連動)
         wareki_year_options = ["---"]
         default_index_wareki = 0
         start_date_obj = None
@@ -156,7 +157,8 @@ def display_streamlit_app():
         with cols[2]:
             month2 = st.selectbox("月", options=list(range(1, 13)), index=today.month - 1, key="wareki_month_2")
         with cols[3]:
-            day2 = st.selectbox("日", options=list(range(1, 32)), index=today.day - 1, key="wareki_day_2")
+            last_day = calendar.monthrange(start_date_obj.year, month2)[1]
+            day2 = st.selectbox("日", options=list(range(1, last_day + 1)), index=today.day - 1, key="wareki_day_2")
 
         # st.button に変更 (押された時のみ処理を実行)
         submitted2 = st.button("西暦に変換", key="convert_wareki_2_seireki_btn")
