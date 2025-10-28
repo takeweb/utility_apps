@@ -5,6 +5,7 @@ from datetime import datetime
 import time
 import locale
 import pytz
+import io
 
 def get_tz_time():
     # タイムゾーン「Asia/Tokyo」のオブジェクトを取得
@@ -71,6 +72,7 @@ def draw_clock():
     """
     Streamlit上にアナログ時計を表示する。
     """
+    st.set_page_config(layout="centered")
     st.title("時計アプリ")
 
     print_date()
@@ -80,15 +82,22 @@ def draw_clock():
     placeholder2 = st.empty()
 
     while True:
-        with placeholder1:
+        with placeholder1.container():
             # デジタル時計の表示
             now = get_tz_time()
             digital_time = now.strftime('%H:%M:%S')
             st.text(f"現在時刻: {digital_time}")
 
-        with placeholder2:
+        with placeholder2.container():
             fig = plot_clock()
-            st.pyplot(fig)
+            st.pyplot(fig, width='content')
+            # buf = io.BytesIO()
+            # fig.savefig(buf, format="png", bbox_inches='tight', pad_inches=0)
+            # buf.seek(0)
+
+            # # ★ 提案B: 幅を 300px に固定して表示
+            # st.image(buf, width=500)
+
             plt.close(fig)  # 図を閉じてメモリを解放
 
         time.sleep(1)
