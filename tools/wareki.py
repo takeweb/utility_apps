@@ -78,7 +78,7 @@ def fetch_wareki_data(_supabase: Client):
             return response.data
         else:
             st.error("warekisテーブルからデータを取得できませんでした。")
-            return []
+            return
     except Exception as e:
         st.error(f"Supabaseからのデータ取得中にエラーが発生しました: {e}")
         return []
@@ -104,7 +104,7 @@ def display_streamlit_app():
     ## 西暦から和暦への変換
     # --------------------------------------------------------------------------
     with st.expander("西暦から和暦への変換", expanded=True):
-        cols = st.columns(3, gap="small", width="stretch")
+        cols = st.columns(3, gap="small")
         with cols[0]:
             year = st.selectbox("年 (西暦)", options=list(range(today.year, 1860, -1)), index=0, key="seireki_year")
         with cols[1]:
@@ -130,7 +130,7 @@ def display_streamlit_app():
     # --------------------------------------------------------------------------
      # フォームの制約を外し、コンボの変更で即座に連動させる
     with st.expander("和暦から西暦への変換", expanded=True):
-        cols = st.columns(4, gap="small", width="stretch")
+        cols = st.columns(4, gap="small")
 
         # 元号のセレクトボックス (変更時に即時再実行)
         with cols[0]:
