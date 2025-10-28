@@ -4,12 +4,22 @@ import numpy as np
 from datetime import datetime
 import time
 import locale
+import pytz
+
+def get_tz_time():
+    # タイムゾーン「Asia/Tokyo」のオブジェクトを取得
+    jst = pytz.timezone("Asia/Tokyo")
+
+    # タイムゾーンを指定して現在時刻を取得
+    now_tz = datetime.now(jst)
+
+    return now_tz
 
 def plot_clock():
     """
     時計を描画する関数
     """
-    now = datetime.now()
+    now = get_tz_time()
     second = now.second
     minute = now.minute + second / 60.0
     hour = now.hour % 12 + minute / 60.0
@@ -72,7 +82,7 @@ def draw_clock():
     while True:
         with placeholder1:
             # デジタル時計の表示
-            now = datetime.now()
+            now = get_tz_time()
             digital_time = now.strftime('%H:%M:%S')
             st.text(f"現在時刻: {digital_time}")
 

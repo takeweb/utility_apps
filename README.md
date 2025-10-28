@@ -4,6 +4,7 @@
 ```
 uv init
 uv add streamlit
+uv add pytz
 ```
 
 ## 仮想環境へ入る
