@@ -7,14 +7,15 @@ uv add streamlit
 uv add pytz
 ```
 
+## 仮想環境を作成(git clone直後のみ)
+```
+uv venv
+uv sync
+```
+
 ## 仮想環境へ入る
 ```
 source .venv/bin/activate
-```
-
-## 仮想環境内にpyproject.tomlに書かれている依存関係全てを適用(最初だけ)
-```
-uv sync
 ```
 
 ## 実行

@@ -212,3 +212,7 @@ __marimo__/
 
 # for Mac
 **/.DS_Store
+
+# for VS Code
+**/.vscode/
+.history
