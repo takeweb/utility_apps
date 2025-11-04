@@ -86,10 +86,11 @@ def print_date(supabase: Client):
     today = datetime.today()
 
     wareki = convert_seireki_2_wareki(supabase, today.year, today.month, today.day)
+    wareki_year = wareki.split("年")[0]
 
     # strftime()メソッドを使って日付と曜日をフォーマット
     formatted_month_date_ja = today.strftime("%m月%d日(%a)")
-    formatted_date_ja = f"{today.year}({wareki})年{formatted_month_date_ja}"
+    formatted_date_ja = f"{today.year}({wareki_year})年{formatted_month_date_ja}"
     st.title(formatted_date_ja)
 
 
