@@ -106,7 +106,7 @@ def draw_clock():
     while True:
         with placeholder1.container():
             # デジタル時計の表示
-            now = get_tz_time()
+            now = get_tz_time("Asia/Tokyo")
             digital_time = now.strftime("%H:%M:%S")
             st.text(f"現在時刻: {digital_time}")
 
