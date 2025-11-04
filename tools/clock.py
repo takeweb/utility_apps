@@ -1,12 +1,15 @@
 import streamlit as st
-import matplotlib.pyplot as plt
-import numpy as np
+import streamlit.components.v1 as components
+# import matplotlib.pyplot as plt
+# import numpy as np
 from datetime import datetime
 import time
 import locale
 import pytz
 from lunardate import LunarDate
 from supabase import Client
+# from streamlit_echarts import st_echarts
+# from streamlit_autorefresh import st_autorefresh
 from libs.supabase_client import get_supabase_client
 from tools.wareki import convert_seireki_2_wareki
 
@@ -27,69 +30,156 @@ def calculate_rokuyo(date):
     rokuyo = rokuyo_list[total % 6]
     return rokuyo
 
-def plot_clock(now: datetime):
+def plot_all_clocks_js_only(jst_offset_hours=9):
     """
-    時計を描画する関数
+    デジタル時計とアナログ時計の両方をJSで自己更新する
+    HTMLコンポーネントを「1回だけ」描画する関数
+    （アナログ秒針をデジタルと同期させ、体感ズレを解消）
     """
-    # now = get_tz_time("Asia/Tokyo")
-    second = now.second
-    minute = now.minute + second / 60.0
-    hour = now.hour % 12 + minute / 60.0
 
-    fig, ax = plt.subplots(figsize=(4, 4))
-    ax.set_xlim(-1.5, 1.5)
-    ax.set_ylim(-1.5, 1.5)
-    ax.set_aspect("equal")
-    ax.axis("off")
+    html_code = f"""
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
 
-    # 文字盤の背景色を設定
-    circle = plt.Circle((0, 0), 1.2, color="#f0f0f0", ec="black", lw=2, zorder=0)
-    ax.add_artist(circle)
+    <div id="digital_clock_display" style="
+        font-family: 'Consolas', 'Menlo', 'Monaco', 'monospace';
+        font-size: 1.1rem;
+        padding-bottom: 1rem;
+    ">
+        現在時刻: --:--:--
+    </div>
 
-    # 時計の目盛り（内側にずらす）
-    for i in range(12):
-        angle = 2 * np.pi * i / 12
-        x = np.sin(angle)
-        y = np.cos(angle)
-        ax.text(
-            1.0 * x,
-            1.0 * y,
-            str(i if i != 0 else 12),
-            ha="center",
-            va="center",
-            fontsize=12,
-        )
+    <div id="analog_clock_chart" style="width: 100%; height: 400px;"></div>
 
-    # 時針
-    hour_angle = 2 * np.pi * hour / 12
-    ax.plot(
-        [0, 0.6 * np.sin(hour_angle)],
-        [0, 0.6 * np.cos(hour_angle)],
-        color="black",
-        linewidth=6,
-        label="Hour",
-    )
+    <script>
+        var chartDom = document.getElementById('analog_clock_chart');
+        var myChart = echarts.init(chartDom);
+        var digitalClockDom = document.getElementById('digital_clock_display');
 
-    # 分針
-    minute_angle = 2 * np.pi * minute / 60
-    ax.plot(
-        [0, 0.8 * np.sin(minute_angle)],
-        [0, 0.8 * np.cos(minute_angle)],
-        color="blue",
-        linewidth=4,
-        label="Minute",
-    )
+        const jstOffsetHours = {jst_offset_hours};
 
-    # 秒針
-    second_angle = 2 * np.pi * second / 60
-    ax.plot(
-        [0, 0.9 * np.sin(second_angle)],
-        [0, 0.9 * np.cos(second_angle)],
-        color="red",
-        linewidth=2,
-        label="Second",
-    )
-    return fig
+        // アナログ時計のオプション
+        var option = {{
+            series: [
+                // 1. 時計盤
+                {{
+                    type: "gauge", startAngle: 90, endAngle: -270,
+                    min: 0, max: 12, splitNumber: 4,
+                    axisLine: {{ lineStyle: {{ width: 10 }} }},
+                    axisTick: {{ show: false }},
+                    splitLine: {{ length: 15, lineStyle: {{ width: 3 }} }},
+                    axisLabel: {{
+                        distance: 15, fontSize: 18,
+                        formatter: function(value) {{
+                            if (value === 0) {{ return ''; }} return value;
+                        }}
+                    }},
+                    pointer: {{ show: false }}, detail: {{ show: false }},
+                    animation: false,
+                }},
+                // 2. 時針
+                {{
+                    type: "gauge", startAngle: 90, endAngle: -270,
+                    min: 0, max: 12, axisLine: {{ show: false }},
+                    axisTick: {{ show: false }}, splitLine: {{ show: false }},
+                    axisLabel: {{ show: false }},
+                    pointer: {{ width: 8, length: "60%" }},
+                    detail: {{ show: false }}, animation: false,
+                    data: [{{ value: 0 }}]
+                }},
+                // 3. 分針
+                {{
+                    type: "gauge", startAngle: 90, endAngle: -270,
+                    min: 0, max: 60, axisLine: {{ show: false }},
+                    axisTick: {{ show: false }}, splitLine: {{ show: false }},
+                    axisLabel: {{ show: false }},
+                    pointer: {{ width: 4, length: "80%" }},
+                    detail: {{ show: false }}, animation: false,
+                    data: [{{ value: 0 }}]
+                }},
+                // 4. 秒針 (ズレ修正済み)
+                {{
+                    type: "gauge",
+                    startAngle: 90, endAngle: -270,
+                    min: 0, max: 60,
+                    "splitNumber": 12, // 5秒ごと
+                    "axisLine": {{ "show": false }},
+                    "axisTick": {{
+                        "show": true, "splitNumber": 5, "length": 8, // 1秒ごと
+                        "lineStyle": {{ "width": 1 }}
+                    }},
+                    "splitLine": {{
+                        "show": true, "length": 12, "lineStyle": {{ "width": 2 }}
+                    }},
+                    "axisLabel": {{ "show": false }},
+                    "pointer": {{ "width": 2, "length": "90%", "itemStyle": {{ "color": "red" }} }},
+                    "detail": {{ "show": false }}, "animation": false,
+                    "data": [{{ value: 0 }}]
+                }}
+            ]
+        }};
+
+        myChart.setOption(option);
+
+        // --- 時計を更新する関数 ---
+        function updateAllClocks() {{
+
+            // JST計算
+            const localNow = new Date();
+            const localOffsetMinutes = localNow.getTimezoneOffset();
+            const utcMillis = localNow.getTime() + (localOffsetMinutes * 60 * 1000);
+            const jstMillis = utcMillis + (jstOffsetHours * 60 * 60 * 1000);
+            const now = new Date(jstMillis);
+
+            // アナログ時計の計算
+            const h = (now.getHours() % 12) + now.getMinutes() / 60;
+            const m = now.getMinutes() + now.getSeconds() / 60;
+
+            // ----------------------------------------------------
+            // 修正点：ミリ秒を切り捨て、デジタル時計と同期させる
+            const s = now.getSeconds() + 1;
+            // ----------------------------------------------------
+
+            myChart.setOption({{
+                series: [
+                    {{}},
+                    {{ data: [{{ value: h }}] }},
+                    {{ data: [{{ value: m }}] }},
+                    {{ data: [{{ value: s }}] }},
+                ]
+            }});
+
+            // デジタル時計の計算
+            const digital_h = String(now.getHours()).padStart(2, '0');
+            const digital_m = String(now.getMinutes()).padStart(2, '0');
+            const digital_s = String(now.getSeconds() + 1).padStart(2, '0');
+
+            digitalClockDom.innerText = `現在時刻: ${{digital_h}}:${{digital_m}}:${{digital_s}}`;
+        }}
+
+        // --- 遅延蓄積を解消する再帰ループ ---
+        function tick() {{
+            // 1. 「次の秒の0ミリ秒」までの遅延を計算
+            const now = new Date();
+            const millis = now.getMilliseconds();
+            const delay = 1000 - millis;
+
+            // 2. 計算した遅延後に「更新と次のタイマーセット」を実行
+            setTimeout(() => {{
+                // 3. ほぼ0ミリ秒時点で時刻を更新（描画）
+                updateAllClocks();
+
+                // 4. 次のタイマー（tick自身）をセット
+                tick();
+            }}, delay);
+        }}
+
+        // 最初のタイマーだけセット
+        tick();
+
+    </script>
+    """
+
+    components.html(html_code, height=450)
 
 
 def print_date(supabase: Client):
@@ -120,26 +210,39 @@ def draw_clock():
     st.logo(icon)
     # st.title("時計アプリ")
 
+    # st_autorefresh(interval=1000, key="clock_autorefresh")
+    # count = st_autorefresh(interval=1000, limit=None, key="clock_refresh")
+
     print_date(supabase_client)
 
     # 時計をリアルタイムで更新
-    placeholder1 = st.empty()
-    # placeholder2 = st.empty()
+    # placeholder1 = st.empty()
 
-    while True:
-        now = get_tz_time("Asia/Tokyo")
-        with placeholder1.container():
-            # デジタル時計の表示
-            digital_time = now.strftime("%H:%M:%S")
-            st.text(f"現在時刻: {digital_time}")
+    # アナログ時計の表示
+    # plot_clock()
+    plot_all_clocks_js_only(jst_offset_hours=9)
+
+    # while True:
+    #     now = get_tz_time("Asia/Tokyo")
+    #     with placeholder1.container():
+    #         # デジタル時計の表示
+    #         digital_time = now.strftime("%H:%M:%S")
+    #         st.text(f"現在時刻: {digital_time}")
 
         # with placeholder2.container():
+            # アナログ時計の表示
+            # plot_clock(now=now)
+            # plot_clock(now, count)
         #     fig = plot_clock(now)
         #     st.pyplot(fig, width="content")
         #     plt.close(fig)  # 図を閉じてメモリを解放
 
-        time.sleep(1)
+        # time.sleep(1)
 
 
 if __name__ == "__main__":
+    # if "initialized" not in st.session_state:
+    #     st.session_state["initialized"] = True
+    #     st_autorefresh(interval=1000, limit=None, key="clock_refresh")
+
     draw_clock()
