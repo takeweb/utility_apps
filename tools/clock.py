@@ -5,6 +5,7 @@ from datetime import datetime
 import time
 import locale
 import pytz
+from lunardate import LunarDate
 from supabase import Client
 from libs.supabase_client import get_supabase_client
 from tools.wareki import convert_seireki_2_wareki
@@ -15,6 +16,16 @@ def get_tz_time(tz_str):
 
     # タイムゾーンを指定して現在時刻を取得
     return datetime.now(tz)
+
+def calculate_rokuyo(date):
+    # 旧暦に変換
+    lunar_date = LunarDate.fromSolarDate(date.year, date.month, date.day)
+
+    # 六曜リスト（旧暦の月と日を合計し、6で割った余りによる）
+    rokuyo_list = ["大安", "赤口", "先勝", "友引", "先負", "仏滅"]
+    total = lunar_date.month + lunar_date.day
+    rokuyo = rokuyo_list[total % 6]
+    return rokuyo
 
 def plot_clock():
     """
@@ -88,9 +99,11 @@ def print_date(supabase: Client):
     wareki = convert_seireki_2_wareki(supabase, today.year, today.month, today.day)
     wareki_year = wareki.split("年")[0]
 
+    rokuyo = calculate_rokuyo(today)
+
     # strftime()メソッドを使って日付と曜日をフォーマット
     formatted_month_date_ja = today.strftime("%m月%d日(%a)")
-    formatted_date_ja = f"{today.year}({wareki_year})年{formatted_month_date_ja}"
+    formatted_date_ja = f"{today.year}({wareki_year})年{formatted_month_date_ja} {rokuyo}"
     st.title(formatted_date_ja)
 
 
