@@ -1,15 +1,10 @@
 import streamlit as st
 import streamlit.components.v1 as components
-# import matplotlib.pyplot as plt
-# import numpy as np
 from datetime import datetime
-import time
 import locale
 import pytz
 from lunardate import LunarDate
 from supabase import Client
-# from streamlit_echarts import st_echarts
-# from streamlit_autorefresh import st_autorefresh
 from libs.supabase_client import get_supabase_client
 from tools.wareki import convert_seireki_2_wareki
 
@@ -40,7 +35,14 @@ def plot_all_clocks_js_only(jst_offset_hours=9):
     html_code = f"""
     <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
 
-    <div id="digital_clock_display" style="
+    <div id="digital_clock_display_jst" style="
+        font-family: 'Consolas', 'Menlo', 'Monaco', 'monospace';
+        font-size: 1.1rem;
+        padding-bottom: 1rem;
+    ">
+        現在時刻: --:--:--
+    </div>
+    <div id="digital_clock_display_utc" style="
         font-family: 'Consolas', 'Menlo', 'Monaco', 'monospace';
         font-size: 1.1rem;
         padding-bottom: 1rem;
@@ -48,17 +50,19 @@ def plot_all_clocks_js_only(jst_offset_hours=9):
         現在時刻: --:--:--
     </div>
 
+
     <div id="analog_clock_chart" style="width: 100%; height: 400px;"></div>
 
     <script>
-        var chartDom = document.getElementById('analog_clock_chart');
-        var myChart = echarts.init(chartDom);
-        var digitalClockDom = document.getElementById('digital_clock_display');
+        const chartDom = document.getElementById('analog_clock_chart');
+        const myChart = echarts.init(chartDom);
+        const digitalClockDomJst = document.getElementById('digital_clock_display_jst');
+        const digitalClockDomUtc = document.getElementById('digital_clock_display_utc');
 
         const jstOffsetHours = {jst_offset_hours};
 
         // アナログ時計のオプション
-        var option = {{
+        const option = {{
             series: [
                 // 1. 時計盤
                 {{
@@ -136,7 +140,7 @@ def plot_all_clocks_js_only(jst_offset_hours=9):
 
             // ----------------------------------------------------
             // 修正点：ミリ秒を切り捨て、デジタル時計と同期させる
-            const s = now.getSeconds() + 1;
+            const s = now.getSeconds();
             // ----------------------------------------------------
 
             myChart.setOption({{
@@ -148,12 +152,17 @@ def plot_all_clocks_js_only(jst_offset_hours=9):
                 ]
             }});
 
-            // デジタル時計の計算
+            // デジタル時計(JST)の計算と表示
             const digital_h = String(now.getHours()).padStart(2, '0');
             const digital_m = String(now.getMinutes()).padStart(2, '0');
-            const digital_s = String(now.getSeconds() + 1).padStart(2, '0');
+            const digital_s = String(now.getSeconds()).padStart(2, '0');
+            digitalClockDomJst.innerText = `現在時刻(JST): ${{digital_h}}:${{digital_m}}:${{digital_s}}`;
 
-            digitalClockDom.innerText = `現在時刻: ${{digital_h}}:${{digital_m}}:${{digital_s}}`;
+            // デジタル時計(UTC)の計算と表示
+            const utc_h = String(localNow.getUTCHours()).padStart(2, '0');
+            const utc_m = String(localNow.getUTCMinutes()).padStart(2, '0');
+            const utc_s = String(localNow.getUTCSeconds()).padStart(2, '0');
+            digitalClockDomUtc.innerText = `現在時刻(UTC): ${{utc_h}}:${{utc_m}}:${{utc_s}}`;
         }}
 
         // --- 遅延蓄積を解消する再帰ループ ---
@@ -201,48 +210,20 @@ def draw_clock():
     """
     Streamlit上にアナログ時計を表示する。
     """
-    # Supabaseクライアントの初期化
-    supabase_client = get_supabase_client()
-
     icon = "https://upload.wikimedia.org/wikipedia/commons/thumb/9/94/24_hour_Clock_symbols_icon_11.png/960px-24_hour_Clock_symbols_icon_11.png"
 
     st.set_page_config(page_title="時計アプリ", page_icon=icon, layout="centered")
     st.logo(icon)
-    # st.title("時計アプリ")
 
-    # st_autorefresh(interval=1000, key="clock_autorefresh")
-    # count = st_autorefresh(interval=1000, limit=None, key="clock_refresh")
+    # Supabaseクライアントの初期化
+    supabase_client = get_supabase_client()
 
+    # 日付表示
     print_date(supabase_client)
 
-    # 時計をリアルタイムで更新
-    # placeholder1 = st.empty()
-
-    # アナログ時計の表示
-    # plot_clock()
+    # デジタル時計＆アナログ時計の表示
     plot_all_clocks_js_only(jst_offset_hours=9)
-
-    # while True:
-    #     now = get_tz_time("Asia/Tokyo")
-    #     with placeholder1.container():
-    #         # デジタル時計の表示
-    #         digital_time = now.strftime("%H:%M:%S")
-    #         st.text(f"現在時刻: {digital_time}")
-
-        # with placeholder2.container():
-            # アナログ時計の表示
-            # plot_clock(now=now)
-            # plot_clock(now, count)
-        #     fig = plot_clock(now)
-        #     st.pyplot(fig, width="content")
-        #     plt.close(fig)  # 図を閉じてメモリを解放
-
-        # time.sleep(1)
 
 
 if __name__ == "__main__":
-    # if "initialized" not in st.session_state:
-    #     st.session_state["initialized"] = True
-    #     st_autorefresh(interval=1000, limit=None, key="clock_refresh")
-
     draw_clock()
