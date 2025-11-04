@@ -5,6 +5,9 @@ from datetime import datetime
 import time
 import locale
 import pytz
+from supabase import Client
+from libs.supabase_client import get_supabase_client
+from tools.wareki import convert_seireki_2_wareki
 
 def get_tz_time(tz_str):
     # 引数で指定されたタイムゾーンのオブジェクトを取得
@@ -78,12 +81,15 @@ def plot_clock():
     return fig
 
 
-def print_date():
+def print_date(supabase: Client):
     locale.setlocale(locale.LC_TIME, "ja_JP.UTF-8")
     today = datetime.today()
 
+    wareki = convert_seireki_2_wareki(supabase, today.year, today.month, today.day)
+
     # strftime()メソッドを使って日付と曜日をフォーマット
-    formatted_date_ja = today.strftime("%Y年%m月%d日(%a)")
+    formatted_month_date_ja = today.strftime("%m月%d日(%a)")
+    formatted_date_ja = f"{today.year}({wareki})年{formatted_month_date_ja}"
     st.title(formatted_date_ja)
 
 
@@ -91,13 +97,16 @@ def draw_clock():
     """
     Streamlit上にアナログ時計を表示する。
     """
+    # Supabaseクライアントの初期化
+    supabase_client = get_supabase_client()
+
     icon = "https://upload.wikimedia.org/wikipedia/commons/thumb/9/94/24_hour_Clock_symbols_icon_11.png/960px-24_hour_Clock_symbols_icon_11.png"
 
     st.set_page_config(page_title="時計アプリ", page_icon=icon, layout="centered")
     st.logo(icon)
     # st.title("時計アプリ")
 
-    print_date()
+    print_date(supabase_client, )
 
     # 時計をリアルタイムで更新
     placeholder1 = st.empty()

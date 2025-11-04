@@ -5,8 +5,6 @@ from supabase import Client
 from libs.supabase_client import get_supabase_client
 
 # --- ユーティリティ関数 ---
-
-
 # 西暦を和暦に変換する関数
 def convert_seireki_2_wareki(supabase: Client, year: int, month: int, day: int):
     """西暦の日付を和暦に変換して返します。"""
@@ -96,8 +94,6 @@ def fetch_wareki_data(_supabase: Client):
 
 
 # --- Streamlit アプリ本体 ---
-
-
 def display_streamlit_app():
     # Supabaseクライアントの初期化
     supabase_client = get_supabase_client()
