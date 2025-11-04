@@ -27,11 +27,11 @@ def calculate_rokuyo(date):
     rokuyo = rokuyo_list[total % 6]
     return rokuyo
 
-def plot_clock():
+def plot_clock(now: datetime):
     """
     時計を描画する関数
     """
-    now = get_tz_time("Asia/Tokyo")
+    # now = get_tz_time("Asia/Tokyo")
     second = now.second
     minute = now.minute + second / 60.0
     hour = now.hour % 12 + minute / 60.0
@@ -120,23 +120,23 @@ def draw_clock():
     st.logo(icon)
     # st.title("時計アプリ")
 
-    print_date(supabase_client, )
+    print_date(supabase_client)
 
     # 時計をリアルタイムで更新
     placeholder1 = st.empty()
-    placeholder2 = st.empty()
+    # placeholder2 = st.empty()
 
     while True:
+        now = get_tz_time("Asia/Tokyo")
         with placeholder1.container():
             # デジタル時計の表示
-            now = get_tz_time("Asia/Tokyo")
             digital_time = now.strftime("%H:%M:%S")
             st.text(f"現在時刻: {digital_time}")
 
-        with placeholder2.container():
-            fig = plot_clock()
-            st.pyplot(fig, width="content")
-            plt.close(fig)  # 図を閉じてメモリを解放
+        # with placeholder2.container():
+        #     fig = plot_clock(now)
+        #     st.pyplot(fig, width="content")
+        #     plt.close(fig)  # 図を閉じてメモリを解放
 
         time.sleep(1)
 
