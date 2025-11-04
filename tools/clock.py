@@ -5,24 +5,19 @@ from datetime import datetime
 import time
 import locale
 import pytz
-# import io
 
-
-def get_tz_time():
-    # タイムゾーン「Asia/Tokyo」のオブジェクトを取得
-    jst = pytz.timezone("Asia/Tokyo")
+def get_tz_time(tz_str):
+    # 引数で指定されたタイムゾーンのオブジェクトを取得
+    tz = pytz.timezone(tz_str)
 
     # タイムゾーンを指定して現在時刻を取得
-    now_tz = datetime.now(jst)
-
-    return now_tz
-
+    return datetime.now(tz)
 
 def plot_clock():
     """
     時計を描画する関数
     """
-    now = get_tz_time()
+    now = get_tz_time("Asia/Tokyo")
     second = now.second
     minute = now.minute + second / 60.0
     hour = now.hour % 12 + minute / 60.0
@@ -88,7 +83,6 @@ def print_date():
     today = datetime.today()
 
     # strftime()メソッドを使って日付と曜日をフォーマット
-    # %Y: 年、%m: 月、%d: 日、%A: 完全な曜日名
     formatted_date_ja = today.strftime("%Y年%m月%d日(%a)")
     st.write(formatted_date_ja)
 
