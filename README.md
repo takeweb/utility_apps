@@ -23,10 +23,4 @@ source .venv/bin/activate
 streamlit run main.py
 ```
 
-## Streamlit Community Cloudにデプロイする為に、requirements.txtを生成
-```
-rm requirements.txt
-uv export --format 'requirements-txt' > requirements.txt
-```
-
 以上
