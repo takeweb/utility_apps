@@ -45,30 +45,63 @@ def convert_wareki_2_seireki(
     except ValueError:
         return "存在する正しい日付を入力してください"
 
-
 def create_wareki_year_options(era_info: dict) -> tuple[list[str], int, date]:
     """
     元号情報から和暦年の選択肢リスト（文字列）、デフォルトインデックス、開始日を生成します。
+    現在の元号の場合、最大50年後までの選択肢を含みます。
     """
     start_date_obj = datetime.strptime(era_info["start_date"], "%Y-%m-%d").date()
+    today = date.today()
 
-    # 終了年の計算: '9999-12-31'は現在の年を使用
+    final_wareki_year: int
+    default_wareki_year: int
+
     if era_info["end_date"] == "9999-12-31":
-        end_date_obj = date.today()
+        # --- 現在の元号 (例: 令和) の場合 ---
+
+        # 1. 選択肢の最後の年を計算 (今から50年後)
+        # (50年後の西暦年 - 元号開始西暦年 + 1)
+        future_year = today.year + 50
+        final_wareki_year = future_year - start_date_obj.year + 1
+
+        # 2. デフォルトで選択される年を計算 (今年の和暦年)
+        # (今日の西暦年 - 元号開始西暦年 + 1)
+        default_wareki_year = today.year - start_date_obj.year + 1
+
     else:
+        # --- 過去の元号 (例: 平成, 昭和) の場合 ---
         end_date_obj = datetime.strptime(era_info["end_date"], "%Y-%m-%d").date()
 
-    # 和暦年数の計算 (西暦終了年 - 西暦開始年 + 1)
-    wareki_years_count = end_date_obj.year - start_date_obj.year + 1
+        # 1. 選択肢の最後の年を計算 (元号の終了年)
+        # (終了西暦年 - 元号開始西暦年 + 1)
+        final_wareki_year = end_date_obj.year - start_date_obj.year + 1
 
+        # 2. デフォルトで選択される年を計算 (元号の終了年)
+        # ※過去の元号は、その元号の最後の年をデフォルトにします
+        default_wareki_year = final_wareki_year
+
+    # 選択肢リストを作成 (1年から final_wareki_year まで)
     wareki_year_options = []
-    for year in range(1, wareki_years_count + 1):
+    # final_wareki_year + 1 にして、その年自身を含むようにします
+    for year in range(1, final_wareki_year + 1):
         if year == 1:
             wareki_year_options.append("元年")
         else:
             wareki_year_options.append(f"{year}年")
 
-    default_index = len(wareki_year_options) - 1
+    # デフォルトインデックスを計算 (0ベースインデックス)
+    # default_wareki_year は 1始まり (例: 令和6年 = 6)
+    # default_index は 0始まり (リストのインデックス 5)
+    default_index = default_wareki_year - 1
+
+    # 念のため、インデックスがリストの範囲内に収まるように調整
+    # (元号開始年より前になることはないはずですが、安全のため)
+    if default_index < 0:
+        default_index = 0
+    # (50年後よりも未来の年を指定された場合、リストの最後に合わせる)
+    if default_index >= len(wareki_year_options):
+        default_index = len(wareki_year_options) - 1
+
 
     return wareki_year_options, default_index, start_date_obj
 
@@ -117,8 +150,8 @@ def display_streamlit_app():
         with cols[0]:
             year = st.selectbox(
                 "年 (西暦)",
-                options=list(range(today.year, 1860, -1)),
-                index=0,
+                options=list(range(today.year + 50, 1860, -1)),
+                index=50,
                 key="seireki_year",
             )
         with cols[1]:
@@ -169,7 +202,7 @@ def display_streamlit_app():
 
         # 和暦年の計算 (selected_gengo に基づいて連動)
         wareki_year_options = ["---"]
-        default_index_wareki = 0
+        default_index_wareki = 50
         start_date_obj = None
 
         era_info = gengo_map.get(selected_gengo)
