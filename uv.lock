@@ -1349,6 +1349,18 @@ wheels = [
 ]
 
 [[package]]
+name = "streamlit-clipboard"
+version = "0.0.6"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "streamlit" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/80/d6/3ff7a87c50cbbd1abc4bc800f1252bbc3d6bb0298ea3f3e8663070913315/streamlit_clipboard-0.0.6.tar.gz", hash = "sha256:d9cebdb3fcb64694568a136545b39946de2d210317ee9dad9be2258fbccd3c14", size = 377263 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/77/ef/53feb06b90c1a75a12c522e288d948059195db0cce68349d7264bbe9c4b7/streamlit_clipboard-0.0.6-py3-none-any.whl", hash = "sha256:4ffea9fa101e4dce6e77e37c6a35e52c4f3b6209f7b59a0386e5a10a3eb9f8e9", size = 379965 },
+]
+
+[[package]]
 name = "strenum"
 version = "0.4.15"
 source = { registry = "https://pypi.org/simple" }
@@ -1488,6 +1500,7 @@ dependencies = [
     { name = "matplotlib-fontja" },
     { name = "pytz" },
     { name = "streamlit" },
+    { name = "streamlit-clipboard" },
     { name = "supabase" },
     { name = "watchdog" },
 ]
@@ -1499,6 +1512,7 @@ requires-dist = [
     { name = "matplotlib-fontja", specifier = ">=1.1.0" },
     { name = "pytz", specifier = ">=2025.2" },
     { name = "streamlit", specifier = ">=1.50.0" },
+    { name = "streamlit-clipboard", specifier = ">=0.0.6" },
     { name = "supabase", specifier = ">=2.22.1" },
     { name = "watchdog", specifier = ">=6.0.0" },
 ]

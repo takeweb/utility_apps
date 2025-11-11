@@ -10,6 +10,7 @@ dependencies = [
     "matplotlib-fontja>=1.1.0",
     "pytz>=2025.2",
     "streamlit>=1.50.0",
+    "streamlit-clipboard>=0.0.6",
     "supabase>=2.22.1",
     "watchdog>=6.0.0",
 ]
