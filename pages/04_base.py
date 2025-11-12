@@ -4,7 +4,8 @@ import re # 入力バリデーション（検証）用
 # --- アプリの基本設定 ---
 st.set_page_config(
     page_title="基数変換アプリ",
-    page_icon="🔢"
+    page_icon="🔢",
+    layout="wide"
 )
 
 # --- タイトル ---
@@ -19,8 +20,8 @@ mode = st.radio(
     "何を変換しますか？",
     (
         '2進数 を 10進/16進 へ',
-        '10進数 を 2進数 へ',
-        '16進数 を 2進数 へ',
+        '10進数 を 2進/16進 へ',  # ★ラベル変更
+        '16進数 を 2進/10進 へ',  # ★ラベル変更
         '16進 固定小数点 (8.8) を 10進 へ'
     ),
     horizontal=True,
@@ -32,26 +33,21 @@ st.divider()
 # --- メインの処理 ---
 st.subheader("2. 数値を入力")
 
-# モード 1: 2進数 → 10進/16進 (★修正箇所)
+# モード 1: 2進数 → 10進/16進
 if mode == '2進数 を 10進/16進 へ':
     binary_input = st.text_input(
         '変換したい2進数を入力してください',
-        placeholder='例: 101101 または 0b101101', # プレースホルダーを修正
+        placeholder='例: 101101 または 0b101101',
         key='bin_in'
     )
 
     if binary_input:
-        # 入力クレンジング
         binary_input_cleaned = binary_input.strip()
-
-        # ★ '0b' または '0B' があれば除去
         if binary_input_cleaned.startswith(('0b', '0B')):
             binary_input_cleaned = binary_input_cleaned[2:]
 
-        # バリデーション (クレンジング後の文字列を使用)
-        if re.match(r'^[01]+$', binary_input_cleaned):
+        if re.match(r'^[01]+$', binary_input_cleaned) and binary_input_cleaned:
             try:
-                # 変換 (クレンジング後の文字列を使用)
                 decimal_output = int(binary_input_cleaned, 2)
                 hex_output = hex(decimal_output)
 
@@ -62,12 +58,13 @@ if mode == '2進数 を 10進/16進 へ':
 
             except ValueError:
                 st.error('数値が大きすぎるか、変換中にエラーが発生しました。')
+        elif not binary_input_cleaned:
+             pass # 入力が空の場合は何もしない
         else:
-            if binary_input_cleaned: # プレフィックス除去後に何か残っている場合
-                st.warning('入力は0と1のみにしてください。')
+            st.warning('入力は0と1のみにしてください。')
 
-# モード 2: 10進数 → 2進数
-elif mode == '10進数 を 2進数 へ':
+# モード 2: 10進数 → 2進/16進 (★修正箇所)
+elif mode == '10進数 を 2進/16進 へ':
     decimal_input = st.text_input(
         '変換したい10進数を入力してください',
         placeholder='例: 45',
@@ -80,15 +77,21 @@ elif mode == '10進数 を 2進数 へ':
             if decimal_value < 0:
                 st.warning("正の整数を入力してください。")
             else:
+                # 10進 -> 2進
                 binary_output = bin(decimal_value)[2:]
+                # 10進 -> 16進
+                hex_output = hex(decimal_value)
+
                 st.subheader('変換結果')
-                st.metric("2進数 (Binary)", binary_output)
+                col1, col2 = st.columns(2)
+                col1.metric("2進数 (Binary)", binary_output)
+                col2.metric("16進数 (Hexadecimal)", hex_output)
 
         except ValueError:
             st.warning('有効な10進数（半角数字）を入力してください。')
 
-# モード 3: 16進数 → 2進数
-elif mode == '16進数 を 2進数 へ':
+# モード 3: 16進数 → 2進/10進 (★修正箇所)
+elif mode == '16進数 を 2進/10進 へ':
     hex_input = st.text_input(
         '変換したい16進数を入力してください',
         placeholder='例: 1973 または 0x1973',
@@ -101,23 +104,30 @@ elif mode == '16進数 を 2進数 へ':
         if hex_input_cleaned.startswith(('0x', '0X')):
             hex_input_cleaned = hex_input_cleaned[2:]
 
-        if re.match(r'^[0-9a-fA-F]+$', hex_input_cleaned):
+        if re.match(r'^[0-9a-fA-F]+$', hex_input_cleaned) and hex_input_cleaned:
             try:
+                # 16進 -> 10進
                 decimal_value = int(hex_input_cleaned, 16)
+
+                # 10進 -> 2進
                 binary_shortest = bin(decimal_value)[2:]
 
+                # 0埋め処理
                 num_hex_digits = len(hex_input_cleaned)
                 required_bits = num_hex_digits * 4
                 binary_output = binary_shortest.zfill(required_bits)
 
                 st.subheader('変換結果')
-                st.metric("2進数 (Binary)", binary_output)
+                col1, col2 = st.columns(2)
+                col1.metric("2進数 (Binary)", binary_output)
+                col2.metric("10進数 (Decimal)", decimal_value)
 
             except ValueError:
                 st.warning('有効な16進数を入力してください。')
+        elif not hex_input_cleaned:
+            pass # 入力が空の場合は何もしない
         else:
-            if hex_input_cleaned:
-                st.warning('入力は有効な16進数（0-9, a-f, A-F）にしてください。')
+            st.warning('入力は有効な16進数（0-9, a-f, A-F）にしてください。')
 
 # モード 4: 16進 固定小数点 (8.8) → 10進
 elif mode == '16進 固定小数点 (8.8) を 10進 へ':
