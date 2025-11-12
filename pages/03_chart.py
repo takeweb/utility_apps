@@ -1,4 +1,3 @@
-import streamlit as st
 import tools.math.fibonacci as fibonacci
 import tools.math.sin as sin
 import tools.math.cos as cos
