@@ -67,30 +67,35 @@ def gen_chart():
     """
     カプレカ数をグラフ表示し、データフレームで表示する。
     """
-    st.title("Kaprekar Numbers Viewer")
+    with st.expander("**カプレカ数 (Kaprekar Numbers) グラフ**", expanded=True):
 
-    max_digits = st.slider("最大桁数を選択", min_value=1, max_value=6, value=4)
-    st.write(f"{max_digits}桁までのカプレカ数を表示します。")
 
-    kaprekar_numbers = find_kaprekar_numbers(max_digits)
+        max_digits = st.slider("最大桁数を選択", min_value=1, max_value=6, value=4)
+        st.write(f"{max_digits}桁までのカプレカ数を表示します。")
 
-    # 桁数ごとの件数をカウント
-    digit_counts = Counter(len(str(num)) for num in kaprekar_numbers)
+        kaprekar_numbers = find_kaprekar_numbers(max_digits)
 
-    # グラフの作成
-    plt.figure(figsize=(10, 6))
-    plt.bar(digit_counts.keys(), digit_counts.values(), tick_label=[f"{d}桁" for d in digit_counts.keys()])
-    plt.xlabel("桁数")
-    plt.ylabel("件数")
-    plt.title(f"桁数ごとのカプレカ数 (最大 {max_digits} 桁)")
+        # 桁数ごとの件数をカウント
+        digit_counts = Counter(len(str(num)) for num in kaprekar_numbers)
 
-    # Streamlitでグラフを表示
-    st.pyplot(plt)
+        # グラフの作成
+        plt.figure(figsize=(10, 6))
+        plt.bar(digit_counts.keys(), digit_counts.values(), tick_label=[f"{d}桁" for d in digit_counts.keys()])
+        plt.xlabel("桁数")
+        plt.ylabel("件数")
+        plt.title(f"桁数ごとのカプレカ数 (最大 {max_digits} 桁)")
 
-    # カプレカ数をデータフレームで表示（インデックス非表示）
-    df = pd.DataFrame({
-        "桁数": [len(str(num)) for num in kaprekar_numbers],
-        "Kaprekar Numbers": kaprekar_numbers
-    }).reset_index(drop=True)
-    st.write("生成されたカプレカ数:")
-    st.dataframe(df, width='stretch')
+        # グリッド（格子線）をY軸に追加
+        plt.grid(axis='y', linestyle='--', alpha=0.7)
+
+        # Streamlitでグラフを表示
+        st.pyplot(plt)
+
+        # カプレカ数をデータフレームで表示
+        with st.expander("**カプレカ数の詳細**", expanded=False):
+            df = pd.DataFrame({
+                "桁数": [len(str(num)) for num in kaprekar_numbers],
+                "Kaprekar Numbers": kaprekar_numbers
+            }).reset_index(drop=True)
+            st.write("生成されたカプレカ数:")
+            st.dataframe(df, width='stretch')

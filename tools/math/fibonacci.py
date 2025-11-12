@@ -26,16 +26,16 @@ def generate_fibonacci(n: int) -> List[int]:
     return fibonacci
 
 def gen_chart():
-    st.write("### フィボナッチ数列")
-    n = st.slider('フィボナッチ数列の要素数を選択してください', 1, 30, 10)
-    fibonacci_sequence = generate_fibonacci(n)
-    st.write(f"フィボナッチ数列（最初の{n}項）: {fibonacci_sequence}")
+    with st.expander("**フィボナッチ数列**", expanded=True):
+        n = st.slider('フィボナッチ数列の要素数を選択してください', 1, 30, 10)
+        fibonacci_sequence = generate_fibonacci(n)
+        st.write(f"フィボナッチ数列（最初の{n}項）: {fibonacci_sequence}")
 
-    # フィボナッチ数列のグラフ描画
-    fig, ax = plt.subplots()
-    ax.plot(range(n), fibonacci_sequence, marker='o')
-    ax.set_title('フィボナッチ数列のグラフ')
-    ax.set_xlabel('項の番号')
-    ax.set_ylabel('値')
-    st.pyplot(fig)
-
+        # フィボナッチ数列のグラフ描画
+        fig, ax = plt.subplots()
+        ax.plot(range(n), fibonacci_sequence, marker='o')
+        ax.set_title('フィボナッチ数列のグラフ')
+        ax.set_xlabel('項の番号')
+        ax.set_ylabel('値')
+        ax.grid(True)
+        st.pyplot(fig)
