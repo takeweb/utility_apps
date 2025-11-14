@@ -75,6 +75,15 @@ def gen_chart():
 
         kaprekar_numbers = find_kaprekar_numbers(max_digits)
 
+        # カプレカ数をデータフレームで表示
+        with st.expander("**カプレカ数の詳細**", expanded=True):
+            df = pd.DataFrame({
+                "桁数": [len(str(num)) for num in kaprekar_numbers],
+                "Kaprekar Numbers": kaprekar_numbers
+            }).reset_index(drop=True)
+            st.write("生成されたカプレカ数:")
+            st.dataframe(df, width='stretch')
+
         # 桁数ごとの件数をカウント
         digit_counts = Counter(len(str(num)) for num in kaprekar_numbers)
 
@@ -90,12 +99,3 @@ def gen_chart():
 
         # Streamlitでグラフを表示
         st.pyplot(plt)
-
-        # カプレカ数をデータフレームで表示
-        with st.expander("**カプレカ数の詳細**", expanded=False):
-            df = pd.DataFrame({
-                "桁数": [len(str(num)) for num in kaprekar_numbers],
-                "Kaprekar Numbers": kaprekar_numbers
-            }).reset_index(drop=True)
-            st.write("生成されたカプレカ数:")
-            st.dataframe(df, width='stretch')
