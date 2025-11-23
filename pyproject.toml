@@ -8,6 +8,7 @@ dependencies = [
     "lunardate>=0.2.2",
     "matplotlib>=3.10.7",
     "matplotlib-fontja>=1.1.0",
+    "pyperclip>=1.11.0",
     "pytz>=2025.2",
     "streamlit>=1.50.0",
     "streamlit-clipboard>=0.0.6",
