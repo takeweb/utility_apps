@@ -211,7 +211,12 @@ elif mode == "10進数 を 16進 固定小数点 (8.8) へ":
                 )  # 修正: int(decimal_input) -> integer_part
                 fractional_part_hex = int(round(fractional_part * 256))
 
-                q88_hex = f"0x{integer_part:02X}{fractional_part_hex:02X}"  # 0xを追加
+                # 丸め処理によるオーバーフローを防ぐ
+                if fractional_part_hex == 256:
+                    fractional_part_hex = 0
+                    integer_part += 1
+
+                q88_hex = f"0x{integer_part:02X}{fractional_part_hex:02X}"
 
                 st.subheader("変換結果 (16進 固定小数点 8.8)")
                 st.metric("16進数 (Hexadecimal)", q88_hex)
