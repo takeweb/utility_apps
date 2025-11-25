@@ -3,28 +3,34 @@ import string
 import streamlit as st
 from clipboard_component import copy_component
 
+
 def main():
-    st.title("Password Generator")
+    # --- アプリの基本設定 ---
+    st.set_page_config(page_title="パスワード生成アプリ", page_icon="🔐")
+
+    st.title("🔐 パスワードジェネレーター")
 
     # パスワード生成オプションの設定
-    length = st.slider("Password Length", 8, 32, 16)
-    include_numbers = st.checkbox("Include Numbers", value=True)
-    include_special_chars = st.checkbox("Include Special Characters", value=True)
+    length = st.slider("パスワードの長さ", 8, 32, 16)
+    include_numbers = st.checkbox("数字を含める", value=True)
+    include_special_chars = st.checkbox("特殊文字を含める", value=True)
 
     # st.text_input の代わりにこれを使う
     selected_special_chars = ""
     if include_special_chars:
         all_special_chars = list(string.punctuation)
         selected_list = st.multiselect(
-            "Select Special Characters to Include",
+            "含める特殊文字を選択してください",
             options=all_special_chars,
-            default=all_special_chars # デフォルトで全て選択
+            default=all_special_chars,  # デフォルトで全て選択
         )
         # st.multiselect はリストを返すので、文字列に結合する
         selected_special_chars = "".join(selected_list)
 
-    if st.button("Generate Password"):
-        password = generate_password(length, include_numbers, include_special_chars, selected_special_chars)
+    if st.button("パスワード生成！！"):
+        password = generate_password(
+            length, include_numbers, include_special_chars, selected_special_chars
+        )
         if password:
             st.success("Password generated: " + password)
 
@@ -32,9 +38,14 @@ def main():
             copy_component("Copy to clipboard", content=password)
 
         else:
-            st.error("Cannot generate password. Please select at least one character type (or add special characters).")
+            st.error(
+                "Cannot generate password. Please select at least one character type (or add special characters)."
+            )
 
-def generate_password(length, include_numbers, include_special_chars, selected_special_chars):
+
+def generate_password(
+    length, include_numbers, include_special_chars, selected_special_chars
+):
     characters = string.ascii_letters
 
     if include_numbers:
@@ -46,7 +57,7 @@ def generate_password(length, include_numbers, include_special_chars, selected_s
 
     # もし使用可能な文字が空だった場合（例：全部OFFにして記号も空にした）
     if not characters:
-        return None # エラー処理のためにNoneを返す
+        return None  # エラー処理のためにNoneを返す
 
-    password = ''.join(random.choice(characters) for _ in range(length))
+    password = "".join(random.choice(characters) for _ in range(length))
     return password

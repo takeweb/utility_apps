@@ -1,10 +1,10 @@
 import streamlit as st
 
 # --- アプリの基本設定 ---
-st.set_page_config(page_title="UNIXパーミッション変換アプリ", page_icon="🔐")
+st.set_page_config(page_title="UNIXパーミッション変換アプリ", page_icon="🛃")
 
 # --- タイトル ---
-st.title("🔐 UNIXパーミッション変換アプリ")
+st.title("🛃 UNIXパーミッション変換アプリ")
 st.caption(
     "R, W, X のチェックボックスでパーミッションを計算、または数値からパーミッションを確認できます。"
 )
