@@ -14,7 +14,7 @@ def main():
         "pages/02_wareki.py", label="西暦・和暦 相互変換アプリはこちら", icon="📅"
     )
     st.page_link("pages/03_chart.py", label="数学グラフアプリはこちら", icon="📊")
-    st.page_link("pages/04_base.py", label="基数変換アプリはこちら", icon="🔢")
+    st.page_link("pages/04_base_converter.py", label="基数変換アプリはこちら", icon="🔢")
     st.page_link(
         "pages/05_genpasswd.py", label="パスワード生成アプリはこちら", icon="🔐"
     )
