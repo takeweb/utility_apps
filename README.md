@@ -23,4 +23,9 @@ source .venv/bin/activate
 streamlit run main.py
 ```
 
+## テスト実行
+```
+python -m unittest tests/test_base_converter.py
+```
+
 以上
