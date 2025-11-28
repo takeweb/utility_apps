@@ -1,11 +1,11 @@
 import streamlit as st
 import re
 from tools.base_converter import (
-    convert_bin_to_dec_hex
-    , convert_dec_to_bin_hex
-    , convert_hex_to_bin_dec
-    , convert_q88_to_dec
-    , convert_dec_to_q88
+    convert_bin_to_dec_hex,
+    convert_dec_to_bin_hex,
+    convert_hex_to_bin_dec,
+    convert_q88_to_dec,
+    convert_dec_to_q88,
 )
 
 # --- アプリの基本設定 ---
@@ -37,7 +37,7 @@ st.divider()
 # --- メインの処理 ---
 st.subheader("2. 数値を入力")
 
-# モード 1: 2進数 → 10進/16進 (最終修正版)
+# モード 1: 2進数 → 10進/16進
 if mode == "2進数 を 10進/16進 へ":
     binary_input = st.text_input(
         "変換したい2進数を入力してください (例: 101101 または 0b101101)",
@@ -53,12 +53,15 @@ if mode == "2進数 を 10進/16進 へ":
         if re.match(r"^[01]+$", binary_input_cleaned) and binary_input_cleaned:
             try:
                 # 変換関数の呼び出し
-                decimal_output, hex_output, binary_output = convert_bin_to_dec_hex(binary_input_cleaned)
+                (decimal_signed, decimal_unsigned, hex) = convert_bin_to_dec_hex(
+                    binary_input_cleaned
+                )
 
                 st.subheader("変換結果")
-                col1, col2 = st.columns(2)
-                col1.metric("10進数 (Decimal)", decimal_output)
-                col2.metric("16進数 (Hexadecimal)", hex_output)
+                col1, col2, col3 = st.columns(3)
+                col1.metric("10進数 (Signed Decimal)", decimal_signed)
+                col2.metric("10進数 (Unsigned Decimal)", decimal_unsigned)
+                col3.metric("16進数 (Hexadecimal)", hex)
 
             except ValueError:
                 st.error("数値が大きすぎるか、変換中にエラーが発生しました。")
@@ -105,12 +108,16 @@ elif mode == "16進数 を 2進/10進 へ":
         if re.match(r"^[0-9a-fA-F]+$", hex_input_cleaned) and hex_input_cleaned:
             try:
                 # 変換関数の呼び出し
-                binary_output, decimal_value = convert_hex_to_bin_dec(hex_input_cleaned)
+                binary_output, decimal_value_signed, decimal_value_unsigned = (
+                    convert_hex_to_bin_dec(hex_input_cleaned)
+                )
 
                 st.subheader("変換結果")
-                col1, col2 = st.columns(2)
+                col1, _ = st.columns([3, 1])  # col1を広くするための調整
                 col1.metric("2進数 (Binary)", binary_output)
-                col2.metric("10進数 (Decimal)", decimal_value)
+                col2, col3 = st.columns(2)
+                col2.metric("10進数 (Signed Decimal)", decimal_value_signed)
+                col3.metric("10進数 (Unsigned Decimal)", decimal_value_unsigned)
 
             except ValueError:
                 st.error("数値が大きすぎるか、変換中にエラーが発生しました。")
@@ -119,7 +126,6 @@ elif mode == "16進数 を 2進/10進 へ":
 
 # モード 4: 16進 固定小数点 (8.8) → 10進
 elif mode == "16進 固定小数点 (8.8) を 10進 へ":
-
     q88_input = st.text_input(
         "変換したい16進固定小数点(8.8)の値を入力 (例: 0x1973)",
         placeholder="16進数 4桁で入力 (0x, . は自動除去) (例: 0x1973)",
@@ -141,7 +147,12 @@ elif mode == "16進 固定小数点 (8.8) を 10進 へ":
         else:
             try:
                 # 変換関数の呼び出し
-                final_decimal_value, integer_part_dec, fractional_part_dec_int, fractional_part_dec = convert_q88_to_dec(cleaned_input)
+                (
+                    final_decimal_value,
+                    integer_part_dec,
+                    fractional_part_dec_int,
+                    fractional_part_dec,
+                ) = convert_q88_to_dec(cleaned_input)
                 integer_part_hex = cleaned_input[0:2]
                 fractional_part_hex = cleaned_input[2:4]
 
@@ -182,7 +193,9 @@ elif mode == "10進数 を 16進 固定小数点 (8.8) へ":
                 st.warning("入力値は-128以上128未満である必要があります。")
             else:
                 # 変換関数の呼び出し
-                q88_hex, integer_part, fractional_part_hex_int, fractional_part = convert_dec_to_q88(decimal_value)
+                q88_hex, integer_part, fractional_part_hex_int, fractional_part = (
+                    convert_dec_to_q88(decimal_value)
+                )
                 fractional_part_hex = int(round(fractional_part * 256))
 
                 st.subheader("変換結果 (16進 固定小数点 8.8)")

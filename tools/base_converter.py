@@ -26,22 +26,19 @@ def convert_bin_to_dec_hex(binary_input_cleaned):
     padded_binary = binary_input_cleaned.zfill(bit_length)
 
     # 16ビットの符号なし値として解釈
-    decimal_output = int(padded_binary, 2)
+    decimal_unsigned = int(padded_binary, 2)  # 2進数を10進数に変換
 
     # 2の補数として符号付き整数に変換
-    if decimal_output & (1 << (bit_length - 1)):
+    decimal_signed = decimal_unsigned
+    if decimal_unsigned & (1 << (bit_length - 1)):
         # 最上位ビット (MSB) が 1 の場合、負の値として処理
-        decimal_output -= (1 << bit_length)
+        decimal_signed -= 1 << bit_length
 
     # 16進数出力:
-    # 16進数への変換では、元の16ビット表現 (符号なし 0xFFFF マスク) を使用
-    # f-string で '04X' を使用し、4桁固定（ゼロ埋め）と大文字を指定
-    hex_output = f"0x{(decimal_output & 0xFFFF):04X}"
+    hex = f"0x{(decimal_signed & 0xFFFF):04X}"
 
-    # 2進数出力も確認のため返す
-    binary_output = "0b" + padded_binary
+    return (decimal_signed, decimal_unsigned, hex)
 
-    return decimal_output, hex_output, binary_output
 
 def convert_dec_to_bin_hex(decimal_value):
     """
@@ -81,6 +78,7 @@ def convert_dec_to_bin_hex(decimal_value):
 
     return binary_output, hex_output
 
+
 def convert_hex_to_bin_dec(hex_input_cleaned):
     """
     16進数文字列を、2進数と10進数に変換
@@ -102,17 +100,19 @@ def convert_hex_to_bin_dec(hex_input_cleaned):
     """
     bit_length = 16
 
-    # 16進 -> 10進（符号付き整数として解釈）
-    decimal_value = int(hex_input_cleaned, 16)
+    # 16進 -> 10進（符号なし整数として解釈）
+    decimal_value_unsigned = int(hex_input_cleaned, 16)
 
-    # 2の補数として符号付き整数に変換
-    if decimal_value & (1 << (bit_length - 1)):
-        decimal_value -= 1 << bit_length
+    # 16進 -> 10進（符号付き整数として解釈）
+    decimal_value_signed = decimal_value_unsigned
+    if decimal_value_unsigned & (1 << (bit_length - 1)):
+        decimal_value_signed -= 1 << bit_length
 
     # 10進 -> 2進
-    binary_output = "0b" + bin(decimal_value & 0xFFFF)[2:].zfill(16)
+    binary_output = "0b" + bin(decimal_value_unsigned & 0xFFFF)[2:].zfill(16)
 
-    return binary_output, decimal_value
+    return binary_output, decimal_value_signed, decimal_value_unsigned
+
 
 def convert_q88_to_dec(q88_hex_4digit):
     """
@@ -145,7 +145,13 @@ def convert_q88_to_dec(q88_hex_4digit):
 
     final_decimal_value = integer_part_dec + fractional_part_dec
 
-    return final_decimal_value, integer_part_dec, fractional_part_dec_int, fractional_part_dec
+    return (
+        final_decimal_value,
+        integer_part_dec,
+        fractional_part_dec_int,
+        fractional_part_dec,
+    )
+
 
 def convert_dec_to_q88(decimal_value_float):
     """
