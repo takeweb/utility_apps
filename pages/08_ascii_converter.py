@@ -125,7 +125,7 @@ elif mode == "2進数 を 文字列 へ":
             st.error("無効な2進数が含まれています。")
 
 elif mode == "16進数 を 文字列 へ":
-    hex_input = st.text_area("16進数を入力してください (例: 414243)")
+    hex_input = st.text_input("16進数を入力してください (例: 414243)")
 
     if hex_input:
         # 入力文字列を2文字ずつに分割
