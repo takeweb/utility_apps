@@ -43,7 +43,7 @@ match mode[1]:
         # 10進数 → 2進/16進
         st.divider()
         st.subheader("2. ビット数を選択")
-        scale = st.slider("2進数でのビット数", min_value=8, max_value=32, value=16, step=8)  # ビット数の設定
+        scale = st.slider("2進数でのビット数", min_value=4, max_value=16, value=16, step=4)  # ビット数の設定
 
         st.divider()
         st.subheader("3. 数値を入力")
