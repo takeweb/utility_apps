@@ -15,8 +15,6 @@ st.set_page_config(page_title="基数変換アプリ", page_icon="🔢")
 st.title("🔢 基数変換アプリ")
 st.caption("2進数、10進数、16進数、および固定小数点の変換を行います。")
 
-st.divider()  # 区切り線
-
 # --- 変換モードの選択 ---
 st.subheader("1. 変換モードを選択")
 
@@ -35,7 +33,6 @@ mode = st.radio(
     horizontal=True,
     label_visibility="collapsed",
 )
-
 
 # --- メインの処理 ---
 match mode[1]:
