@@ -101,7 +101,7 @@ match mode[1]:
         st.divider()
         st.subheader("2. 数値を入力")
         hex_input = st.text_input(
-            "変換したい16進数を入力してください (例: 0x1973)",
+            "変換したい16進数を入力してください (例: 1973 または 0x1973)",
             placeholder="例: 1973 または 0x1973",
             key="hex_in",
         )
@@ -136,8 +136,8 @@ match mode[1]:
         st.divider()
         st.subheader("2. 数値を入力")
         q88_input = st.text_input(
-            "変換したい16進固定小数点(8.8)の値を入力 (例: 0x1973)",
-            placeholder="16進数 4桁で入力 (0x, . は自動除去) (例: 0x1973)",
+            "変換したい16進固定小数点(8.8)の値を入力 (例: 1973 または 0x1973)",
+            placeholder="16進数 4桁で入力 (0x, . は自動除去) (例: 1973 または 0x1973)",
             key="q88_in",
         )
 
