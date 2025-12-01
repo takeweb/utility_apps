@@ -35,12 +35,6 @@ mode = st.radio(
     horizontal=True,
     label_visibility="collapsed",
 )
-
-st.divider()
-
-st.subheader("2. ビット数を選択")
-scale = st.slider("2進数でのビット数", min_value=8, max_value=32, value=16, step=8)  # ビット数の設定
-
 st.divider()
 
 # --- メインの処理 ---
@@ -49,6 +43,11 @@ st.subheader("3. 数値を入力")
 match mode[1]:
     case "DEC_TO_BIN_HEX":
         # 10進数 → 2進/16進
+        st.divider()
+
+        st.subheader("2. ビット数を選択")
+        scale = st.slider("2進数でのビット数", min_value=8, max_value=32, value=16, step=8)  # ビット数の設定
+
         decimal_input = st.text_input("変換したい10進数を入力してください", placeholder="例: 45", key="dec_in")
 
         if decimal_input:
