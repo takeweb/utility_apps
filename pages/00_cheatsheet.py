@@ -2,7 +2,7 @@ import streamlit as st
 
 icon = "https://upload.wikimedia.org/wikipedia/commons/4/48/Markdown-mark.svg"
 
-st.set_page_config(page_title="Markdown Cheat Sheet", page_icon=icon, layout="wide")
+st.set_page_config(page_title="Markdown Cheat Sheet", page_icon=icon)
 
 st.logo(icon, link="https://github.com/gfm/")
 st.markdown("### Markdown Cheat Sheet")
