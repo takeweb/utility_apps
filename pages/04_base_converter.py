@@ -40,7 +40,7 @@ match mode[1]:
         # 10進数 → 2進/16進
         st.divider()
         st.subheader("2. ビット数を選択")
-        scale = st.slider("2進数でのビット数", min_value=4, max_value=16, value=16, step=4)  # ビット数の設定
+        bit_length = st.slider("2進数でのビット数", min_value=4, max_value=16, value=16, step=4)  # ビット数の設定
 
         st.divider()
         st.subheader("3. 数値を入力")
@@ -49,7 +49,7 @@ match mode[1]:
         if decimal_input:
             try:
                 # 変換関数の呼び出し
-                binary_output, hex_output = convert_dec_to_bin_hex(int(decimal_input), scale)
+                binary_output, hex_output = convert_dec_to_bin_hex(int(decimal_input), bit_length)
 
                 st.subheader("変換結果")
                 col1, col2 = st.columns(2)

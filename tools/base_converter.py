@@ -20,27 +20,32 @@ def convert_bin_to_dec_hex(binary_input_cleaned):
     Raises:
         ValueError: 入力が16ビットを超える場合。
     """
-    bit_length = 16
 
-    # 入力文字列を16ビットにゼロ埋め (符号解釈の基準)
+    bit_length = len(binary_input_cleaned)
+
+    # 入力文字列を bit_length ビットにゼロ埋め (符号解釈の基準)
     padded_binary = binary_input_cleaned.zfill(bit_length)
 
-    # 16ビットの符号なし値として解釈
-    decimal_unsigned = int(padded_binary, 2)  # 2進数を10進数に変換
+    # unsigned 値として読み取る
+    decimal_unsigned = int(padded_binary, 2)
 
-    # 2の補数として符号付き整数に変換
-    decimal_signed = decimal_unsigned
+    # signed（2の補数）
     if decimal_unsigned & (1 << (bit_length - 1)):
-        # 最上位ビット (MSB) が 1 の場合、負の値として処理
-        decimal_signed -= 1 << bit_length
+        decimal_signed = decimal_unsigned - (1 << bit_length)
+    else:
+        decimal_signed = decimal_unsigned
 
-    # 16進数出力:
-    hex = f"0x{(decimal_signed & 0xFFFF):04X}"
+    # -------------------------
+    # HEX も bit_length に応じて可変にする
+    # -------------------------
+    width = (bit_length + 3) // 4  # 4bit = 1 hex、切り上げ
+    mask = (1 << bit_length) - 1   # bit_length マスク
+    hex = f"0x{(decimal_signed & mask):0{width}X}"
 
     return (decimal_signed, decimal_unsigned, hex)
 
 
-def convert_dec_to_bin_hex(decimal_value, scale):
+def convert_dec_to_bin_hex(decimal_value, bit_length):
     """
     10進数値を、16ビットの2の補数と16進数に変換する
     例:
@@ -54,7 +59,7 @@ def convert_dec_to_bin_hex(decimal_value, scale):
     例: -45 -> "0xFFD3", 45 -> "0x002D"
     Args:
         decimal_value (int): 変換する10進数値 (例: -45)
-        scale (int): 2進数でのビット数 (例: 16)
+        bit_length (int): 2進数でのビット数 (例: 16)
     Returns:
         tuple: (2進数文字列 (str), 16進数文字列 (str))
     Raises:
@@ -62,13 +67,13 @@ def convert_dec_to_bin_hex(decimal_value, scale):
     """
 
     # **2の補数ロジック**
-    # scale ビットに合わせてマスクを作る
-    mask = (1 << scale) - 1
+    # bit_lengthに合わせてマスクを作る
+    mask = (1 << bit_length) - 1
     masked_value = decimal_value & mask
 
     # 2進数出力: 2の補数表現で16桁固定
     # bin() は '0b' が付くため、[2:]で削除してから zfill(16) でゼロ埋め
-    binary_output = "0b" + bin(masked_value)[2:].zfill(scale)
+    binary_output = "0b" + bin(masked_value)[2:].zfill(bit_length)
 
     # 16進数出力:
     # - '0x' は小文字
@@ -76,7 +81,7 @@ def convert_dec_to_bin_hex(decimal_value, scale):
     #   - '0' : ゼロ埋め
     #   - '4' : 最小幅 4桁
     #   - 'X' : 16進数（大文字）
-    width = int(scale / 4)
+    width = int(bit_length / 4)
     hex_output = f"0x{masked_value:0{width}X}"
 
     return binary_output, hex_output
@@ -101,20 +106,26 @@ def convert_hex_to_bin_dec(hex_input_cleaned):
     Raises:
         ValueError: 入力が16ビットを超える場合。
     """
-    bit_length = 16
+    # 16進→10進（符号なし）
+    decimal_unsigned = int(hex_input_cleaned, 16)
 
-    # 16進 -> 10進（符号なし整数として解釈）
-    decimal_value_unsigned = int(hex_input_cleaned, 16)
+    # 入力HEXのビット長（4bit × 桁数）
+    bit_length = len(hex_input_cleaned) * 4
 
-    # 16進 -> 10進（符号付き整数として解釈）
-    decimal_value_signed = decimal_value_unsigned
-    if decimal_value_unsigned & (1 << (bit_length - 1)):
-        decimal_value_signed -= 1 << bit_length
+    # -------------------------
+    #  符号付き整数（2の補数）
+    # -------------------------
+    if decimal_unsigned & (1 << (bit_length - 1)):
+        decimal_signed = decimal_unsigned - (1 << bit_length)
+    else:
+        decimal_signed = decimal_unsigned
 
-    # 10進 -> 2進
-    binary_output = "0b" + bin(decimal_value_unsigned & 0xFFFF)[2:].zfill(16)
+    # -------------------------
+    # 2進数出力（bit_length に合わせて可変）
+    # -------------------------
+    binary_output = "0b" + bin(decimal_unsigned)[2:].zfill(bit_length)
 
-    return binary_output, decimal_value_signed, decimal_value_unsigned
+    return binary_output, decimal_signed, decimal_unsigned
 
 
 def convert_q88_to_dec(q88_hex_4digit):
