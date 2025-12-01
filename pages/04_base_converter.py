@@ -22,8 +22,8 @@ options = [
     ("10進数 を 2進/16進 へ", "DEC_TO_BIN_HEX"),
     ("2進数 を 10進/16進 へ", "BIN_TO_DEC_HEX"),
     ("16進数 を 2進/10進 へ", "HEX_TO_BIN_DEC"),
-    ("16進 固定小数点 (8.8) を 10進 へ", "FIXED88_TO_DEC"),
     ("10進数 を 16進 固定小数点 (8.8) へ", "DEC_TO_FIXED88"),
+    ("16進 固定小数点 (8.8) を 10進 へ", "FIXED88_TO_DEC"),
 ]
 
 mode = st.radio(
