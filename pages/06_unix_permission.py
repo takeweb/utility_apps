@@ -18,21 +18,21 @@ col1, col2, col3 = st.columns(3)
 
 with col1:
     st.text("所有者 (Owner)")
-    owner_r = st.checkbox("読み取り (R)", key="owner_r")
-    owner_w = st.checkbox("書き込み (W)", key="owner_w")
-    owner_x = st.checkbox("実行 (X)", key="owner_x")
+    owner_r = st.checkbox("R:4: 読み取り", key="owner_r")
+    owner_w = st.checkbox("W:2: 書き込み", key="owner_w")
+    owner_x = st.checkbox("X:1: 実行", key="owner_x")
 
 with col2:
     st.text("グループ (Group)")
-    group_r = st.checkbox("読み取り (R)", key="group_r")
-    group_w = st.checkbox("書き込み (W)", key="group_w")
-    group_x = st.checkbox("実行 (X)", key="group_x")
+    group_r = st.checkbox("R:4: 読み取り", key="group_r")
+    group_w = st.checkbox("W:2: 書き込み", key="group_w")
+    group_x = st.checkbox("X:1: 実行", key="group_x")
 
 with col3:
     st.text("その他 (Others)")
-    others_r = st.checkbox("読み取り (R)", key="others_r")
-    others_w = st.checkbox("書き込み (W)", key="others_w")
-    others_x = st.checkbox("実行 (X)", key="others_x")
+    others_r = st.checkbox("R:4: 読み取り", key="others_r")
+    others_w = st.checkbox("W:2: 書き込み", key="others_w")
+    others_x = st.checkbox("X:1: 実行", key="others_x")
 
 if st.button("計算"):
     owner_value = (4 if owner_r else 0) + (2 if owner_w else 0) + (1 if owner_x else 0)

@@ -13,10 +13,10 @@ def main():
     st.page_link(
         "pages/02_wareki.py", label="西暦・和暦 相互変換アプリはこちら", icon="📅"
     )
-    st.page_link("pages/03_chart.py", label="数学グラフアプリはこちら", icon="📊")
+    st.page_link("pages/03_math_charts.py", label="数学グラフアプリはこちら", icon="📊")
     st.page_link("pages/04_base_converter.py", label="基数変換アプリはこちら", icon="🔢")
     st.page_link(
-        "pages/05_genpasswd.py", label="パスワード生成アプリはこちら", icon="🔐"
+        "pages/05_password_generator.py", label="パスワード生成アプリはこちら", icon="🔐"
     )
     st.page_link(
         "pages/06_unix_permission.py",
@@ -24,6 +24,7 @@ def main():
         icon="🛃",
     )
     st.page_link("pages/07_color_display.py", label="色表示アプリはこちら", icon="🎨")
+    st.page_link("pages/08_ascii_converter.py", label="ASCII変換アプリはこちら", icon="🔤")
 
     st.divider()  # 区切り線
 

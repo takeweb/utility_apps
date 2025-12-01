@@ -40,7 +40,7 @@ def convert_bin_to_dec_hex(binary_input_cleaned):
     return (decimal_signed, decimal_unsigned, hex)
 
 
-def convert_dec_to_bin_hex(decimal_value):
+def convert_dec_to_bin_hex(decimal_value, scale):
     """
     10進数値を、16ビットの2の補数と16進数に変換する
     例:
@@ -66,7 +66,7 @@ def convert_dec_to_bin_hex(decimal_value):
 
     # 2進数出力: 2の補数表現で16桁固定
     # bin() は '0b' が付くため、[2:]で削除してから zfill(16) でゼロ埋め
-    binary_output = "0b" + bin(masked_value)[2:].zfill(16)
+    binary_output = "0b" + bin(masked_value)[2:].zfill(scale)
 
     # 16進数出力:
     # - '0x' は小文字
@@ -74,7 +74,8 @@ def convert_dec_to_bin_hex(decimal_value):
     #   - '0' : ゼロ埋め
     #   - '4' : 最小幅 4桁
     #   - 'X' : 16進数（大文字）
-    hex_output = f"0x{masked_value:04X}"
+    width = int(scale / 4)
+    hex_output = f"0x{masked_value:0{width}X}"
 
     return binary_output, hex_output
 

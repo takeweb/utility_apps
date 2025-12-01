@@ -1,39 +1,16 @@
 import streamlit as st
-
-
-def convert_string_to_ascii_binary_hex(input_string):
-    ascii_codes = [ord(char) for char in input_string]
-    binary_codes = [bin(ord(char))[2:].zfill(8) for char in input_string]
-    hex_codes = [hex(ord(char))[2:].upper().zfill(2) for char in input_string]
-    return ascii_codes, binary_codes, hex_codes
-
-
-def convert_ascii_to_string(ascii_codes):
-    try:
-        return "".join(chr(int(code)) for code in ascii_codes)
-    except ValueError:
-        return None
-
-
-def convert_binary_to_string(binary_codes):
-    try:
-        return "".join(chr(int(code, 2)) for code in binary_codes)
-    except ValueError:
-        return None
-
-
-def convert_hex_to_string(hex_codes):
-    try:
-        return "".join(chr(int(code, 16)) for code in hex_codes)
-    except ValueError:
-        return None
-
+from tools.ascii_converter import (
+    convert_string_to_ascii_binary_hex,
+    convert_ascii_to_string,
+    convert_binary_to_string,
+    convert_hex_to_string,
+)
 
 # --- アプリの基本設定 ---
-st.set_page_config(page_title="ASCIIコード変換アプリ", page_icon="🔤")
+st.set_page_config(page_title="ASCII変換アプリ", page_icon="🔤")
 
 # --- タイトル ---
-st.title("🔤 文字列変換アプリ")
+st.title("🔤 ASCII変換アプリ")
 st.caption("文字列をASCIIコード、2進数、16進数に相互変換します。")
 
 st.divider()  # 区切り線
