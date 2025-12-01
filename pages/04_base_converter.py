@@ -103,7 +103,6 @@ match mode[1]:
         # 16進数 → 2進/10進
         st.divider()
         st.subheader("2. 数値を入力")
-        st.write("16進 固定小数点(8.8) → 10進 の処理")
         hex_input = st.text_input(
             "変換したい16進数を入力してください (例: 0x1973)",
             placeholder="例: 1973 または 0x1973",
