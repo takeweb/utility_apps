@@ -54,15 +54,17 @@ def convert_dec_to_bin_hex(decimal_value, scale):
     例: -45 -> "0xFFD3", 45 -> "0x002D"
     Args:
         decimal_value (int): 変換する10進数値 (例: -45)
+        scale (int): 2進数でのビット数 (例: 16)
     Returns:
         tuple: (2進数文字列 (str), 16進数文字列 (str))
     Raises:
         ValueError: 入力が -32768 未満または 32767 超の場合。
     """
 
-    # **2の補数ロジック**：16ビットマスクを適用
-    # 0xFFFF は 2進数で 16個の '1'
-    masked_value = decimal_value & 0xFFFF
+    # **2の補数ロジック**
+    # scale ビットに合わせてマスクを作る
+    mask = (1 << scale) - 1
+    masked_value = decimal_value & mask
 
     # 2進数出力: 2の補数表現で16桁固定
     # bin() は '0b' が付くため、[2:]で削除してから zfill(16) でゼロ埋め
