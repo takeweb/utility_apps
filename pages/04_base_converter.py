@@ -33,16 +33,17 @@ mode = st.radio(
     horizontal=True,
     label_visibility="collapsed",
 )
+st.divider()
 
 # --- メインの処理 ---
 match mode[1]:
     case "DEC_TO_BIN_HEX":
         # 10進数 → 2進/16進
-        st.divider()
-        st.subheader("2. ビット数を選択")
-        bit_length = st.slider("2進数でのビット数", min_value=4, max_value=16, value=16, step=4)  # ビット数の設定
+        st.subheader("2. バイト数を選択")
+        byte_length = st.slider("バイト数", min_value=1, max_value=4, value=2, step=1)  # バイト数の設定
+        bit_length = byte_length * 8
+        st.write(f"選択されたバイト数: {byte_length} バイト ({bit_length} ビット)")
 
-        st.divider()
         st.subheader("3. 数値を入力")
         decimal_input = st.text_input("変換したい10進数を入力してください", placeholder="例: 45", key="dec_in")
 
@@ -52,16 +53,14 @@ match mode[1]:
                 binary_output, hex_output = convert_dec_to_bin_hex(int(decimal_input), bit_length)
 
                 st.subheader("変換結果")
-                col1, col2 = st.columns(2)
-                col1.metric("2進数 (Binary)", binary_output)
-                col2.metric("16進数 (Hexadecimal)", hex_output)
+                st.metric("2進数 (Binary)", binary_output)
+                st.metric("16進数 (Hexadecimal)", hex_output)
 
             except ValueError:
                 st.warning("有効な10進数（半角数字）を入力してください。")
 
     case "BIN_TO_DEC_HEX":
         # 2進数 → 10進/16進
-        st.divider()
         st.subheader("2. 数値を入力")
         binary_input = st.text_input(
             "変換したい2進数を入力してください (例: 101101 または 0b101101)",
@@ -98,7 +97,6 @@ match mode[1]:
 
     case "HEX_TO_BIN_DEC":
         # 16進数 → 2進/10進
-        st.divider()
         st.subheader("2. 数値を入力")
         hex_input = st.text_input(
             "変換したい16進数を入力してください (例: 1973 または 0x1973)",
@@ -133,7 +131,6 @@ match mode[1]:
 
     case "FIXED88_TO_DEC":
         # 16進 固定小数点 (8.8) → 10進
-        st.divider()
         st.subheader("2. 数値を入力")
         q88_input = st.text_input(
             "変換したい16進固定小数点(8.8)の値を入力 (例: 1973 または 0x1973)",
@@ -187,7 +184,6 @@ match mode[1]:
 
     case "DEC_TO_FIXED88":
         # 10進数 を 16進 固定小数点 (8.8) へ
-        st.divider()
         st.subheader("2. 数値を入力")
         decimal_input = st.text_input(
             "変換したい10進数を入力してください (例: 25.44)",
