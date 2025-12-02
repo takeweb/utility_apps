@@ -39,23 +39,80 @@ def convert_bin_to_dec_hex(binary_input_cleaned):
     # HEX も bit_length に応じて可変にする
     # -------------------------
     width = (bit_length + 3) // 4  # 4bit = 1 hex、切り上げ
-    mask = (1 << bit_length) - 1   # bit_length マスク
+    mask = (1 << bit_length) - 1  # bit_length マスク
     hex = f"0x{(decimal_signed & mask):0{width}X}"
 
     return (decimal_signed, decimal_unsigned, hex)
 
 
-def convert_dec_to_bin_hex(decimal_value, bit_length):
+def convert_dec_to_masked_value(decimal_value, bit_length):
     """
-    10進数値を、16ビットの2の補数と16進数に変換する
+    2の補数ロジックに基づき、
+    bit_lengthに合わせてマスクを作る
+    """
+    mask = (1 << bit_length) - 1
+    masked_value = decimal_value & mask
+
+    return masked_value
+
+
+def convert_dec_to_bin(decimal_value, bit_length):
+    """
+    10進数値を、16ビットの2進数に変換する
     例:
     - 入力: -45 (10進数)
-      出力: "0b1111111111010011" (2進数), "0xFFD3" (16進数)
+      出力: "0b1111111111010011" (2進数)
     - 入力: 45 (10進数)
-      出力: "0b0000000000101101" (2進数), "0x002D" (16進数)
+      出力: "0b0000000000101101" (2進数)
     なお、入力が -32768 未満または 32767 超の場合はエラーとする。
     例: -40000 や 40000 はエラー。
-    変換後の16進数出力は、常に4桁固定（ゼロ埋め）で大文字とする。
+    変換後の2進数出力は、bit_lengthで指定された桁に固定（ゼロ埋め）とする。
+    例: -45 -> "0b1111111111010011", 45 -> "0b0000000000101101"
+    Args:
+        decimal_value (int): 変換する10進数値 (例: -45)
+        bit_length (int): 2進数でのビット数 (例: 16)
+    Returns:
+        2進数文字列 (str)
+    Raises:
+        ValueError: 入力が -32768 未満または 32767 超の場合。
+    """
+    masked_value = convert_dec_to_masked_value(decimal_value, bit_length)
+
+    # 2進数出力: 2の補数表現でbit_length桁固定
+    binary_output = "0b" + bin(masked_value)[2:].zfill(bit_length)
+
+    return binary_output
+
+
+def convert_binary_4digit_grouping(binary_raw):
+    # 先頭の「0b」を除去
+    binary_without_prefix = binary_raw[2:]
+
+    # 4桁区切りにフォーマット
+    formatted_binary = " ".join(
+        [
+            binary_without_prefix[i : i + 4]
+            for i in range(0, len(binary_without_prefix), 4)
+        ]
+    )
+
+    # 先頭に「0b」を再追加
+    binary_output = "0b" + formatted_binary
+
+    return binary_output
+
+
+def convert_dec_to_hex(decimal_value, bit_length):
+    """
+    10進数値を、16進数に変換する
+    例:
+    - 入力: -45 (10進数)
+      出力: "0xFFD3" (16進数)
+    - 入力: 45 (10進数)
+      出力: "0x002D" (16進数)
+    なお、入力が -32768 未満または 32767 超の場合はエラーとする。
+    例: -40000 や 40000 はエラー。
+    変換後の16進数出力は、bit_lengthで指定された桁固定（ゼロ埋め）で大文字とする。
     例: -45 -> "0xFFD3", 45 -> "0x002D"
     Args:
         decimal_value (int): 変換する10進数値 (例: -45)
@@ -65,15 +122,7 @@ def convert_dec_to_bin_hex(decimal_value, bit_length):
     Raises:
         ValueError: 入力が -32768 未満または 32767 超の場合。
     """
-
-    # **2の補数ロジック**
-    # bit_lengthに合わせてマスクを作る
-    mask = (1 << bit_length) - 1
-    masked_value = decimal_value & mask
-
-    # 2進数出力: 2の補数表現で16桁固定
-    # bin() は '0b' が付くため、[2:]で削除してから zfill(16) でゼロ埋め
-    binary_output = "0b" + bin(masked_value)[2:].zfill(bit_length)
+    masked_value = convert_dec_to_masked_value(decimal_value, bit_length)
 
     # 16進数出力:
     # - '0x' は小文字
@@ -82,9 +131,9 @@ def convert_dec_to_bin_hex(decimal_value, bit_length):
     #   - '4' : 最小幅 4桁
     #   - 'X' : 16進数（大文字）
     width = int(bit_length / 4)
-    hex_output = f"0x{masked_value:0{width}X}"
+    output_hex = f"0x{masked_value:0{width}X}"
 
-    return binary_output, hex_output
+    return output_hex
 
 
 def convert_hex_to_bin_dec(hex_input_cleaned):

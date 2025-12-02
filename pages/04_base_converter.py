@@ -2,10 +2,12 @@ import streamlit as st
 import re
 from tools.base_converter import (
     convert_bin_to_dec_hex,
-    convert_dec_to_bin_hex,
+    convert_dec_to_bin,
+    convert_dec_to_hex,
     convert_hex_to_bin_dec,
     convert_q88_to_dec,
     convert_dec_to_q88,
+    convert_binary_4digit_grouping,
 )
 
 # --- アプリの基本設定 ---
@@ -40,21 +42,32 @@ match mode[1]:
     case "DEC_TO_BIN_HEX":
         # 10進数 → 2進/16進
         st.subheader("2. バイト数を選択")
-        byte_length = st.slider("バイト数", min_value=1, max_value=4, value=2, step=1)  # バイト数の設定
+        byte_length = st.slider(
+            "バイト数", min_value=1, max_value=4, value=2, step=1
+        )  # バイト数の設定
         bit_length = byte_length * 8
         st.write(f"選択されたバイト数: {byte_length} バイト ({bit_length} ビット)")
 
         st.subheader("3. 数値を入力")
-        decimal_input = st.text_input("変換したい10進数を入力してください", placeholder="例: 45", key="dec_in")
+        decimal_input = st.text_input(
+            "変換したい10進数を入力してください", placeholder="例: 45", key="dec_in"
+        )
 
         if decimal_input:
             try:
-                # 変換関数の呼び出し
-                binary_output, hex_output = convert_dec_to_bin_hex(int(decimal_input), bit_length)
+                # 2進数の結果を取得
+                output_binary = convert_dec_to_bin(int(decimal_input), bit_length)
+
+                # 16進数の結果を取得
+                output_hex = convert_dec_to_hex(int(decimal_input), bit_length)
 
                 st.subheader("変換結果")
-                st.metric("2進数 (Binary)", binary_output)
-                st.metric("16進数 (Hexadecimal)", hex_output)
+                st.metric("2進数 (Binary)", output_binary)
+                st.metric(
+                    "2進数 (Binary) 4桁区切り",
+                    convert_binary_4digit_grouping(output_binary),
+                )
+                st.metric("16進数 (Hexadecimal)", output_hex)
 
             except ValueError:
                 st.warning("有効な10進数（半角数字）を入力してください。")
@@ -148,7 +161,9 @@ match mode[1]:
                 st.warning("入力は有効な16進数（0-9, a-f, A-F）にしてください。")
 
             elif len(cleaned_input) != 4:
-                st.warning("固定小数点8.8形式は、16進数4桁 (例: C9A0) で入力してください。")
+                st.warning(
+                    "固定小数点8.8形式は、16進数4桁 (例: C9A0) で入力してください。"
+                )
 
             else:
                 try:
