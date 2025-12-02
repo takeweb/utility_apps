@@ -56,18 +56,18 @@ match mode[1]:
         if decimal_input:
             try:
                 # 2進数の結果を取得
-                output_binary = convert_dec_to_bin(int(decimal_input), bit_length)
+                binary_value = convert_dec_to_bin(int(decimal_input), bit_length)
 
                 # 16進数の結果を取得
-                output_hex = convert_dec_to_hex(int(decimal_input), bit_length)
+                hex_value = convert_dec_to_hex(int(decimal_input), bit_length)
 
                 st.subheader("変換結果")
-                st.metric("2進数 (Binary)", output_binary)
+                st.metric("2進数 (Binary)", binary_value)
                 st.metric(
                     "2進数 (Binary) 4桁区切り",
-                    convert_binary_4digit_grouping(output_binary),
+                    convert_binary_4digit_grouping(binary_value),
                 )
-                st.metric("16進数 (Hexadecimal)", output_hex)
+                st.metric("16進数 (Hexadecimal)", hex_value)
 
             except ValueError:
                 st.warning("有効な10進数（半角数字）を入力してください。")

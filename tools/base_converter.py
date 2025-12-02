@@ -97,9 +97,9 @@ def convert_binary_4digit_grouping(binary_raw):
     )
 
     # 先頭に「0b」を再追加
-    binary_output = "0b" + formatted_binary
+    binary = "0b" + formatted_binary
 
-    return binary_output
+    return binary
 
 
 def convert_dec_to_hex(decimal_value, bit_length):
@@ -131,9 +131,9 @@ def convert_dec_to_hex(decimal_value, bit_length):
     #   - '4' : 最小幅 4桁
     #   - 'X' : 16進数（大文字）
     width = int(bit_length / 4)
-    output_hex = f"0x{masked_value:0{width}X}"
+    hex = f"0x{masked_value:0{width}X}"
 
-    return output_hex
+    return hex
 
 
 def convert_hex_to_bin_dec(hex_input_cleaned):
