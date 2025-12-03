@@ -8,12 +8,14 @@ from supabase import Client
 from libs.supabase_client import get_supabase_client
 from tools.wareki import convert_seireki_2_wareki
 
+
 def get_tz_time(tz_str):
     # 引数で指定されたタイムゾーンのオブジェクトを取得
     tz = pytz.timezone(tz_str)
 
     # タイムゾーンを指定して現在時刻を取得
     return datetime.now(tz)
+
 
 def calculate_rokuyo(date):
     # 旧暦に変換
@@ -24,6 +26,7 @@ def calculate_rokuyo(date):
     total = lunar_date.month + lunar_date.day
     rokuyo = rokuyo_list[total % 6]
     return rokuyo
+
 
 def plot_all_clocks_js_only(jst_offset_hours=9):
     """
@@ -185,25 +188,69 @@ def plot_all_clocks_js_only(jst_offset_hours=9):
         // 最初のタイマーだけセット
         tick();
 
+        // ダークモードのスタイル適用時に、JSTとUTCのデジタル時計の背景色と文字色を設定
+        function applyDarkModeStyles(isDarkMode) {{
+            const textColor = isDarkMode ? '#FFFFFF' : '#000000';
+            const backgroundColor = isDarkMode ? '#333333' : '#FFFFFF';
+
+            digitalClockDomJst.style.color = textColor;
+            digitalClockDomUtc.style.color = textColor;
+
+            digitalClockDomJst.style.backgroundColor = backgroundColor;
+            digitalClockDomUtc.style.backgroundColor = backgroundColor;
+            chartDom.style.backgroundColor = backgroundColor; // アナログ時計の背景色も設定
+        }}
+
+        // ダークモードの検出と監視
+        const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+        applyDarkModeStyles(darkModeMediaQuery.matches);
+        darkModeMediaQuery.addEventListener('change', function(event) {{
+            applyDarkModeStyles(event.matches);
+        }});
     </script>
     """
 
-    components.html(html_code, height=450)
+    components.html(html_code, height=500)
 
 
 def print_date(supabase: Client):
     locale.setlocale(locale.LC_TIME, "ja_JP.UTF-8")
     today = datetime.today()
 
+    # 標準の日付表示
+    formatted_standard_date = today.strftime("%Y年%m月%d日(%a)")
+
+    # 日本語表記の日付
     wareki = convert_seireki_2_wareki(supabase, today.year, today.month, today.day)
     wareki_year = wareki.split("年")[0]
 
+    # 六曜計算
     rokuyo = calculate_rokuyo(today)
 
-    # strftime()メソッドを使って日付と曜日をフォーマット
-    formatted_month_date_ja = today.strftime("%m月%d日(%a)")
-    formatted_date_ja = f"{today.year}({wareki_year})年{formatted_month_date_ja} {rokuyo}"
-    st.title(formatted_date_ja)
+    # 月和名
+    month_wamei = {
+        1: "睦月",
+        2: "如月",
+        3: "弥生",
+        4: "卯月",
+        5: "皐月",
+        6: "水無月",
+        7: "文月",
+        8: "葉月",
+        9: "長月",
+        10: "神無月",
+        11: "霜月",
+        12: "師走",
+    }
+    wamei = month_wamei.get(today.month, "")
+
+    formatted_japanese_date = (
+        f"{wareki_year}年{wamei}{today.strftime('%d日(%a)')} {rokuyo}"
+    )
+
+    # Streamlitで表示
+    st.subheader(formatted_standard_date)
+    st.subheader(formatted_japanese_date)
 
 
 def draw_clock():
@@ -213,7 +260,6 @@ def draw_clock():
     icon = "https://upload.wikimedia.org/wikipedia/commons/thumb/9/94/24_hour_Clock_symbols_icon_11.png/960px-24_hour_Clock_symbols_icon_11.png"
 
     st.set_page_config(page_title="時計アプリ", page_icon=icon, layout="centered")
-    st.logo(icon)
 
     # Supabaseクライアントの初期化
     supabase_client = get_supabase_client()
