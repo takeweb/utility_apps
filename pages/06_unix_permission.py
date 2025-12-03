@@ -9,8 +9,6 @@ st.caption(
     "R, W, X のチェックボックスでパーミッションを計算、または数値からパーミッションを確認できます。"
 )
 
-st.divider()  # 区切り線
-
 # --- チェックボックスから数値を計算 ---
 with st.expander("**チェックボックスから数値を計算**", expanded=True):
     col1, col2, col3 = st.columns(3)
