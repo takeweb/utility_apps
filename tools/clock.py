@@ -159,13 +159,13 @@ def plot_all_clocks_js_only(jst_offset_hours=9):
             const digital_h = String(now.getHours()).padStart(2, '0');
             const digital_m = String(now.getMinutes()).padStart(2, '0');
             const digital_s = String(now.getSeconds()).padStart(2, '0');
-            digitalClockDomJst.innerText = `現在時刻(JST): ${{digital_h}}:${{digital_m}}:${{digital_s}}`;
+            digitalClockDomJst.innerText = `JST: ${{digital_h}}:${{digital_m}}:${{digital_s}}`;
 
             // デジタル時計(UTC)の計算と表示
             const utc_h = String(localNow.getUTCHours()).padStart(2, '0');
             const utc_m = String(localNow.getUTCMinutes()).padStart(2, '0');
             const utc_s = String(localNow.getUTCSeconds()).padStart(2, '0');
-            digitalClockDomUtc.innerText = `現在時刻(UTC): ${{utc_h}}:${{utc_m}}:${{utc_s}}`;
+            digitalClockDomUtc.innerText = `UTC: ${{utc_h}}:${{utc_m}}:${{utc_s}}`;
         }}
 
         // --- 遅延蓄積を解消する再帰ループ ---
