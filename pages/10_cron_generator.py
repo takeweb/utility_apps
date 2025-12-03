@@ -10,6 +10,15 @@ st.caption("Cron形式のスケジュール文字列を簡単に生成します�
 # --- 入力フィールド ---
 st.subheader("1. スケジュールを設定")
 
+# Cron形式の切り替え
+cron_type = st.radio("Cron形式を選択", options=["Unix", "Spring"], index=0)
+
+# 秒のセレクトボックス (Spring cron用)
+if cron_type == "Spring":
+    second = st.selectbox(
+        "秒 (0-59, *など)", options=["*"] + [str(i) for i in range(60)], index=0
+    )
+
 # 分、時、日、月、曜日のセレクトボックス
 minute = st.selectbox(
     "分 (0-59, *など)", options=["*"] + [str(i) for i in range(60)], index=0
@@ -23,8 +32,6 @@ day = st.selectbox(
 month = st.selectbox(
     "月 (1-12, *など)", options=["*"] + [str(i) for i in range(1, 13)], index=0
 )
-
-# 曜日の選択肢を名前付きに変更
 weekday_options = {
     "*": "*",
     "日曜": "0",
@@ -47,8 +54,12 @@ command = st.text_input("実行コマンド", value="/path/to/command")
 
 # --- Cron文字列の生成 ---
 if st.button("Cron文字列を生成"):
-    cron_string = f"{minute} {hour} {day} {month} {weekday} {user} {command}"
-    st.subheader("生成されたCron文字列")
+    if cron_type == "Unix":
+        cron_string = f"{minute} {hour} {day} {month} {weekday} {user} {command}"
+    else:  # Spring cron
+        cron_string = f"{second} {minute} {hour} {day} {month} {weekday}"
+
+    st.subheader("3. 生成されたCron文字列")
     st.code(cron_string, language="bash")
 
     st.caption("この文字列をcrontabに追加してください。")
