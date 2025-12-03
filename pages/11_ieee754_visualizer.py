@@ -97,14 +97,17 @@ try:
     # 表現可能範囲の表示
     st.subheader("表現可能な数値の範囲")
     pr = precision_ranges("32" if mode.startswith("32") else "64")
-    rcol1, rcol2 = st.columns(2)
-    with rcol1:
-        st.write(f"最小正のサブ正規化: {pr['min_positive_subnormal']:.3e}")
-        st.write(f"最小正の正規化: {pr['min_positive_normal']:.3e}")
-    with rcol2:
-        st.write(f"最大有限値: {pr['max_finite']:.3e}")
-        er_min, er_max = pr["exponent_range"]
-        st.write(f"指数範囲 (正規化): {er_min} 〜 {er_max}")
+    # 表示はシンプルに最大有限値と指数範囲のみ
+    st.write(f"最大有限値: {pr['max_finite']:.3e}")
+    er_min, er_max = pr["exponent_range"]
+    st.write(f"指数範囲 (正規化): {er_min} 〜 {er_max}")
+
+    # 10進数としての概算レンジ（桁数目安）
+    st.write("10進数としての概算レンジ（正規化数の目安）")
+    if mode.startswith("32"):
+        st.write("単精度(32-bit): おおよそ 10^-38 〜 10^38")
+    else:
+        st.write("倍精度(64-bit): おおよそ 10^-308 〜 10^308")
 
     st.subheader("ビット列")
     st.code(bits)
@@ -116,10 +119,12 @@ try:
     # 詳細は1行表示
     st.subheader("詳細")
     # col1 を狭め、col2/col3 を広めに配置
-    col1, col2, col3 = st.columns([1, 2, 2])
+    col1, col2, col3 = st.columns([1, 2, 3])
     col1.write(f"符号 (sign): {parts['sign']}")
     col2.write(f"指数 (exponent): {parts['exp_val']} (bias={parts['bias']})")
-    col3.write(f"仮数 (mantissa): 長さ {len(parts['mantissa'])}")
+    # 仮数はビット列そのものと、計算された小数部(frac)を表示
+    col3.write(f"仮数 (mantissa bits): {parts['mantissa']}")
+    col3.write(f"仮数の小数部 frac: {parts['frac_val']}")
 
     # 特殊値の扱い・数式表示
     exp = parts["exp_val"]
