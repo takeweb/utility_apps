@@ -126,13 +126,18 @@ match mode[1]:
             if re.match(r"^[0-9a-fA-F]+$", hex_input_cleaned) and hex_input_cleaned:
                 try:
                     # 変換関数の呼び出し
-                    binary_output, decimal_value_signed, decimal_value_unsigned = (
+                    binary_value, decimal_value_signed, decimal_value_unsigned = (
                         convert_hex_to_bin_dec(hex_input_cleaned)
                     )
 
                     st.subheader("変換結果")
                     col1, _ = st.columns([3, 1])  # col1を広くするための調整
-                    col1.metric("2進数 (Binary)", binary_output)
+                    col1.metric("2進数 (Binary)", binary_value)
+                    col1.metric(
+                        "2進数 (Binary) 4桁区切り",
+                        convert_binary_4digit_grouping(binary_value),
+                    )
+
                     col2, col3 = st.columns(2)
                     col2.metric("10進数 (Signed Decimal)", decimal_value_signed)
                     col3.metric("10進数 (Unsigned Decimal)", decimal_value_unsigned)
