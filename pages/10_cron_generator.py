@@ -1,5 +1,4 @@
 import streamlit as st
-import re
 
 
 # 単一選択、範囲選択、カスタム入力の切り替え関数
@@ -13,12 +12,10 @@ def select_single_range_or_custom(label, options):
         label_visibility="collapsed",
     )
     if selection_type == "単一選択":
-        print(options)
         return st.selectbox(label, options, index=0)
     elif selection_type == "範囲選択":
-        print(options)
         # 範囲選択の際に `'*'` を除外
-        range_options = [opt for opt in options if opt != "* (*)"]
+        range_options = [opt for opt in options if opt != "*"]
         cols = st.columns(2)
         with cols[0]:
             from_value = st.selectbox(
@@ -32,10 +29,44 @@ def select_single_range_or_custom(label, options):
                 key=f"{label}_to",
             )
         # 結果を統一して返す
-        print(from_value)
-        print(to_value)
-        print(f"{from_value}-{to_value}")
         return f"{from_value}-{to_value}"
+
+    elif selection_type == "カスタム入力":
+        # カスタム入力も統一形式で返す
+        custom_value = st.text_input(f"{label} (カスタム入力)", value="")
+        return custom_value
+
+
+# 単一選択、範囲選択、カスタム入力の切り替え関数
+def select_single_range_or_customw2(label, options):
+    st.markdown(f"**{label}の選択タイプ**")
+    selection_type = st.radio(
+        "選択タイプを選んでください",
+        ["単一選択", "範囲選択", "カスタム入力"],
+        horizontal=True,
+        key=f"{label}_selection_type",  # 一意のキーを追加
+        label_visibility="collapsed",
+    )
+    if selection_type == "単一選択":
+        value = st.selectbox(label, list(options.keys()), index=0)
+        return options[value]
+    elif selection_type == "範囲選択":
+        # 範囲選択の際に `'*'` を除外
+        range_options = [opt for opt in options.keys() if opt != "*"]
+        cols = st.columns(2)
+        with cols[0]:
+            from_value = st.selectbox(
+                f"{label} (From)", range_options, index=0, key=f"{label}_from"
+            )
+        with cols[1]:
+            to_value = st.selectbox(
+                f"{label} (To)",
+                range_options,
+                index=len(range_options) - 1,
+                key=f"{label}_to",
+            )
+        # 結果を統一して返す
+        return f"{options[from_value]}-{options[to_value]}"
 
     elif selection_type == "カスタム入力":
         # カスタム入力も統一形式で返す
@@ -91,24 +122,14 @@ weekday_options = {
     "土曜": "6",
 }
 # 曜日の選択肢を取得する際に、キーと値を表示形式に変換
-weekday_options_display = [f"{key} ({value})" for key, value in weekday_options.items()]
-weekday_label = select_single_range_or_custom(
-    "曜日 (0-6, *など, 0=日曜)", weekday_options_display
-)
+# weekday_options_display = [f"{key} ({value})" for key, value in weekday_options.items()]
+weekday = select_single_range_or_customw2("曜日 (0-6, *など, 0=日曜)", weekday_options)
 
 # 選択された値を分解して取得
-if weekday_label:
-    # 曜日ラベルから括弧内の数字を全て抽出（単一選択: 1件, 範囲選択: 2件）
-    nums = re.findall(r"\((\d)\)", weekday_label)
-    if len(nums) == 2:
-        weekday = f"{nums[0]}-{nums[1]}"
-    elif len(nums) == 1:
-        weekday = nums[0]
-    else:
-        weekday = "*"
+if weekday:
     st.write(f"変換された曜日の値: {weekday}")  # デバッグ用
 else:
-    st.error(f"無効な曜日が選択されました: {weekday_label}")
+    st.error(f"無効な曜日が選択されました: {weekday}")
     weekday = "*"
 st.divider()  # 区切り線
 
