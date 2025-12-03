@@ -248,9 +248,9 @@ def print_date(supabase: Client):
         f"{wareki_year}年{wamei}{today.strftime('%d日(%a)')} {rokuyo}"
     )
 
-    # Streamlitで表示
-    st.subheader(formatted_standard_date)
-    st.subheader(formatted_japanese_date)
+    col1, col2 = st.columns(2)
+    col1.subheader(formatted_standard_date)
+    col2.subheader(formatted_japanese_date)
 
 
 def draw_clock():
