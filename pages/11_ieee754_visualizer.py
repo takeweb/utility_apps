@@ -57,6 +57,33 @@ def split_ieee754(bits: str):
     }
 
 
+def precision_ranges(kind: str):
+    """Return representable range info for single/double precision.
+    Values include:
+    - min_positive_subnormal
+    - min_positive_normal
+    - max_finite
+    - exponent_range (normal numbers)
+    """
+    if kind.startswith("32"):  # single precision
+        # Known IEEE 754 single-precision constants
+        min_pos_sub = 2**-149  # ~1.401298464e-45
+        min_pos_norm = 2**-126  # ~1.17549435e-38
+        max_finite = (2 - 2**-23) * (2**127)  # ~3.402823466e+38
+        exp_range = (-126, 127)
+    else:  # double precision
+        min_pos_sub = 2**-1074  # ~5.0e-324
+        min_pos_norm = 2**-1022  # ~2.2250738585072014e-308
+        max_finite = (2 - 2**-52) * (2**1023)  # ~1.7976931348623157e+308
+        exp_range = (-1022, 1023)
+    return {
+        "min_positive_subnormal": min_pos_sub,
+        "min_positive_normal": min_pos_norm,
+        "max_finite": max_finite,
+        "exponent_range": exp_range,
+    }
+
+
 # 計算・表示
 try:
     value = float(num_str)
@@ -66,6 +93,18 @@ try:
         bits = float_to_bits_64(value)
 
     parts = split_ieee754(bits)
+
+    # 表現可能範囲の表示
+    st.subheader("表現可能な数値の範囲")
+    pr = precision_ranges("32" if mode.startswith("32") else "64")
+    rcol1, rcol2 = st.columns(2)
+    with rcol1:
+        st.write(f"最小正のサブ正規化: {pr['min_positive_subnormal']:.3e}")
+        st.write(f"最小正の正規化: {pr['min_positive_normal']:.3e}")
+    with rcol2:
+        st.write(f"最大有限値: {pr['max_finite']:.3e}")
+        er_min, er_max = pr["exponent_range"]
+        st.write(f"指数範囲 (正規化): {er_min} 〜 {er_max}")
 
     st.subheader("ビット列")
     st.code(bits)

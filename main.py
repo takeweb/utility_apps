@@ -41,6 +41,11 @@ def main():
         label="Cron文字列ジェネレーターはこちら",
         icon="⏰",
     )
+    st.page_link(
+        "pages/11_ieee754_visualizer.py",
+        label="IEEE 754 可視化ツールはこちら",
+        icon="⚙️",
+    )
 
     st.divider()  # 区切り線
 
