@@ -29,9 +29,16 @@ hour = st.selectbox(
 day = st.selectbox(
     "日 (1-31, *など)", options=["*"] + [str(i) for i in range(1, 32)], index=0
 )
-month = st.selectbox(
-    "月 (1-12, *など)", options=["*"] + [str(i) for i in range(1, 13)], index=0
-)
+# 月のセレクトボックスに偶数月と奇数月を追加
+month_options = ["*"] + [str(i) for i in range(1, 13)] + ["偶数月", "奇数月"]
+month = st.selectbox("月 (1-12, *など)", options=month_options, index=0)
+
+# 偶数月と奇数月の処理
+if month == "偶数月":
+    month = "*/2"
+elif month == "奇数月":
+    month = "1/2"
+
 weekday_options = {
     "*": "*",
     "日曜": "0",
@@ -41,6 +48,7 @@ weekday_options = {
     "木曜": "4",
     "金曜": "5",
     "土曜": "6",
+    "月曜〜金曜": "1-5",
 }
 weekday_label = st.selectbox(
     "曜日 (0-6, *など, 0=日曜)", options=weekday_options.keys(), index=0
