@@ -117,7 +117,7 @@ try:
     exp_bits = len(parts["exponent"])  # 32-bit:8 / 64-bit:11
     mant_bits = len(parts["mantissa"])  # 32-bit:23 / 64-bit:52
     st.subheader(
-        f"分解 (sign[{sign_bits}] | exponent[{exp_bits}] | mantissa[{mant_bits}])"
+        f"分解 (sign[{sign_bits}bit] | exponent[{exp_bits}bit] | mantissa[{mant_bits}bit])"
     )
     st.code(f"{parts['sign']} | {parts['exponent']} | {parts['mantissa']}")
 
