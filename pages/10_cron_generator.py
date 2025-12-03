@@ -4,7 +4,7 @@ import streamlit as st
 # 単一選択、範囲選択、カスタム入力の切り替え関数
 def select_single_range_or_custom(label, options):
     st.divider()  # 区切り線
-    st.markdown(f"### {label}の選択タイプ")
+    st.markdown(f"### {label}の選択")
     selection_type = st.radio(
         "選択タイプを選んでください",
         ["単一選択", "範囲選択", "カスタム入力"],
@@ -43,7 +43,7 @@ def select_single_range_or_custom(label, options):
 # 単一選択、範囲選択、カスタム入力の切り替え関数
 def select_single_range_or_customw2(label, options):
     st.divider()  # 区切り線
-    st.markdown(f"### {label}の選択タイプ")
+    st.markdown(f"### {label}の選択")
     selection_type = st.radio(
         "選択タイプを選んでください",
         ["単一選択", "範囲選択", "カスタム入力"],
