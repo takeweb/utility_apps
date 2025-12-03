@@ -35,6 +35,8 @@ def select_single_range_or_custom(label, options):
     elif selection_type == "カスタム入力":
         # カスタム入力も統一形式で返す
         custom_value = st.text_input(f"{label} (カスタム入力)", value="")
+        # フィールド直下にエラーを出すためのプレースホルダ
+        st.session_state[f"{label}_error_slot"] = st.empty()
         return custom_value
 
 
@@ -73,6 +75,8 @@ def select_single_range_or_customw2(label, options):
     elif selection_type == "カスタム入力":
         # カスタム入力も統一形式で返す
         custom_value = st.text_input(f"{label} (カスタム入力)", value="")
+        # フィールド直下にエラーを出すためのプレースホルダ
+        st.session_state[f"{label}_error_slot"] = st.empty()
         return custom_value
 
 
@@ -132,11 +136,40 @@ st.divider()  # 区切り線
 
 # --- Cron文字列の生成 ---
 if st.button("Cron文字列を生成"):
-    if cron_type == "Unix":
-        cron_string = f"{minute} {hour} {day} {month} {weekday} {user} {command}"
-    else:  # Spring cron
-        cron_string = f"{second} {minute} {hour} {day} {month} {weekday}"
+    # カスタム入力の未入力チェック
+    def is_custom_empty(field_label, value):
+        sel = st.session_state.get(f"{field_label}_selection_type")
+        return sel == "カスタム入力" and (value is None or str(value).strip() == "")
 
-    st.subheader("3. 生成されたCron文字列")
-    st.code(cron_string, language="bash")
-    st.caption("この文字列をcrontabに追加してください。")
+    empty_custom_fields = []
+    # Spring の場合は秒もチェック
+    if cron_type == "Spring":
+        if is_custom_empty("秒", second):
+            empty_custom_fields.append("秒")
+    if is_custom_empty("分", minute):
+        empty_custom_fields.append("分")
+    if is_custom_empty("時", hour):
+        empty_custom_fields.append("時")
+    if is_custom_empty("日", day):
+        empty_custom_fields.append("日")
+    if is_custom_empty("月", month):
+        empty_custom_fields.append("月")
+    if is_custom_empty("曜日", weekday):
+        empty_custom_fields.append("曜日")
+
+    if empty_custom_fields:
+        # 各対象フィールド直下にエラー表示
+        for flabel in empty_custom_fields:
+            slot = st.session_state.get(f"{flabel}_error_slot")
+            if slot is not None:
+                slot.error("カスタム入力が未入力です")
+        # 生成はスキップ
+    else:
+        if cron_type == "Unix":
+            cron_string = f"{minute} {hour} {day} {month} {weekday} {user} {command}"
+        else:  # Spring cron
+            cron_string = f"{second} {minute} {hour} {day} {month} {weekday}"
+
+        st.subheader("3. 生成されたCron文字列")
+        st.code(cron_string, language="bash")
+        st.caption("この文字列をcrontabに追加してください。")
