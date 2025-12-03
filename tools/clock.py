@@ -244,11 +244,9 @@ def print_date(supabase: Client):
     }
     wamei = month_wamei.get(today.month, "")
 
-    formatted_japanese_date = (
-        f"{wareki_year}年{wamei}{today.strftime('%d日(%a)')} {rokuyo}"
-    )
+    formatted_japanese_date = f"{wareki_year}年 {wamei} {rokuyo}"
 
-    col1, col2 = st.columns(2)
+    col1, col2 = st.columns([3, 2])
     col1.subheader(formatted_standard_date)
     col2.subheader(formatted_japanese_date)
 
