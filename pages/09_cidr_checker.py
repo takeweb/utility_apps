@@ -1,11 +1,14 @@
 import streamlit as st
 import ipaddress
 
+from tools.cidr_checker import calculate_subnet_mask
+
+
 # --- アプリの基本設定 ---
-st.set_page_config(page_title="IPアドレス・CIDR変換アプリ", page_icon="🔢")
+st.set_page_config(page_title="IPアドレス・CIDRチェックアプリ", page_icon="🔢")
 
 # --- タイトル ---
-st.title("🔢 IPアドレス・CIDR変換アプリ")
+st.title("🔢 IPアドレス・CIDRチェックアプリ")
 st.caption("IPアドレスとCIDR表記の相互変換およびネットワーク情報の表示を行います。")
 
 # --- 入力フィールド ---
@@ -18,19 +21,6 @@ st.subheader("2. サブネットマスクを選択")
 prefix_length = st.slider(
     "サブネットマスクの長さ (CIDR)", min_value=0, max_value=32, value=24, step=1
 )
-
-
-# --- サブネットマスクの計算関数 ---
-def calculate_subnet_mask(prefix_length):
-    # 2進数表現
-    binary_mask = "1" * prefix_length + "0" * (32 - prefix_length)
-    binary_mask_formatted = " ".join([binary_mask[i : i + 8] for i in range(0, 32, 8)])
-
-    # 10進数表現
-    decimal_mask = str(ipaddress.IPv4Address(int(binary_mask, 2)))
-
-    return binary_mask_formatted, decimal_mask
-
 
 # --- サブネットマスクの表示 ---
 st.subheader("サブネットマスクの情報")
