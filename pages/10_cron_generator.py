@@ -3,7 +3,8 @@ import streamlit as st
 
 # 単一選択、範囲選択、カスタム入力の切り替え関数
 def select_single_range_or_custom(label, options):
-    st.markdown(f"**{label}の選択タイプ**")
+    st.divider()  # 区切り線
+    st.markdown(f"### {label}の選択タイプ")
     selection_type = st.radio(
         "選択タイプを選んでください",
         ["単一選択", "範囲選択", "カスタム入力"],
@@ -39,7 +40,8 @@ def select_single_range_or_custom(label, options):
 
 # 単一選択、範囲選択、カスタム入力の切り替え関数
 def select_single_range_or_customw2(label, options):
-    st.markdown(f"**{label}の選択タイプ**")
+    st.divider()  # 区切り線
+    st.markdown(f"### {label}の選択タイプ")
     selection_type = st.radio(
         "選択タイプを選んでください",
         ["単一選択", "範囲選択", "カスタム入力"],
@@ -89,27 +91,16 @@ cron_type = st.radio("**Cron形式を選択**", options=["Unix", "Spring"], inde
 
 # 秒の選択 (Spring cron用)
 if cron_type == "Spring":
-    second = select_single_range_or_custom(
-        "秒 (0-59, *など)", ["*"] + [str(i) for i in range(60)]
-    )
-st.divider()  # 区切り線
+    second = select_single_range_or_custom("秒", ["*"] + [str(i) for i in range(60)])
 
 # 分、時、日、月、曜日の選択
-minute = select_single_range_or_custom(
-    "分 (0-59, *など)", ["*"] + [str(i) for i in range(60)]
-)
-hour = select_single_range_or_custom(
-    "時 (0-23, *など)", ["*"] + [str(i) for i in range(24)]
-)
-day = select_single_range_or_custom(
-    "日 (1-31, *など)", ["*"] + [str(i) for i in range(1, 32)]
-)
-st.divider()  # 区切り線
+minute = select_single_range_or_custom("分", ["*"] + [str(i) for i in range(60)])
+hour = select_single_range_or_custom("時", ["*"] + [str(i) for i in range(24)])
+day = select_single_range_or_custom("日", ["*"] + [str(i) for i in range(1, 32)])
 
 # 月の選択肢に偶数月と奇数月を追加
 month_options = ["*"] + [str(i) for i in range(1, 13)]
-month = select_single_range_or_custom("月 (1-12, *など)", month_options)
-st.divider()  # 区切り線
+month = select_single_range_or_custom("月", month_options)
 
 weekday_options = {
     "*": "*",
@@ -123,7 +114,7 @@ weekday_options = {
 }
 # 曜日の選択肢を取得する際に、キーと値を表示形式に変換
 # weekday_options_display = [f"{key} ({value})" for key, value in weekday_options.items()]
-weekday = select_single_range_or_customw2("曜日 (0-6, *など, 0=日曜)", weekday_options)
+weekday = select_single_range_or_customw2("曜日", weekday_options)
 
 # 選択された値を分解して取得
 if weekday:
@@ -135,7 +126,6 @@ st.divider()  # 区切り線
 
 # 実行ユーザとコマンドの入力フィールド
 st.subheader("2. 実行ユーザとコマンドを設定")
-st.divider()  # 区切り線
 user = st.text_input("実行ユーザ", value="root")
 command = st.text_input("実行コマンド", value="/path/to/command")
 st.divider()  # 区切り線
