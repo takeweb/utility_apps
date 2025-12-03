@@ -48,12 +48,15 @@ if ip_input:
         else:
             host_range = ("N/A", "N/A")
 
+        # ホスト数をカンマ区切りでフォーマット
+        formatted_host_count = f"{num_addresses - 2:,}" if num_addresses > 2 else "0"
+
         # 結果を表示
         st.subheader("3. ネットワーク情報")
         st.write(f"**ネットワークアドレス:** {network_address}")
         st.write(f"**ブロードキャストアドレス:** {broadcast_address}")
-        st.write(f"**ホスト数:** {num_addresses - 2 if num_addresses > 2 else 0}")
-        st.write(f"**ホスト範囲:** {host_range[0]} - {host_range[1]}")
+        st.write(f"**ホスト数:** {formatted_host_count}")
+        st.write(f"**ホスト範囲:** {host_range[0]} 〜 {host_range[1]}")
 
     except ValueError:
         st.error("無効なIPアドレスが入力されました。正しい形式で入力してください。")
