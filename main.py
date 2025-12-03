@@ -36,6 +36,11 @@ def main():
         label="IPアドレス・CIDRチェックアプリはこちら",
         icon="🌐",
     )
+    st.page_link(
+        "pages/10_cron_generator.py",
+        label="Cron文字列ジェネレーターはこちら",
+        icon="⏰",
+    )
 
     st.divider()  # 区切り線
 
