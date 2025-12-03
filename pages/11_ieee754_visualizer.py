@@ -112,8 +112,13 @@ try:
     st.subheader("ビット列")
     st.code(bits)
 
-    # 分解は1行表示
-    st.subheader("分解 (sign | exponent | mantissa)")
+    # 分解は1行表示（各ビット幅を併記）
+    sign_bits = 1
+    exp_bits = len(parts["exponent"])  # 32-bit:8 / 64-bit:11
+    mant_bits = len(parts["mantissa"])  # 32-bit:23 / 64-bit:52
+    st.subheader(
+        f"分解 (sign[{sign_bits}] | exponent[{exp_bits}] | mantissa[{mant_bits}])"
+    )
     st.code(f"{parts['sign']} | {parts['exponent']} | {parts['mantissa']}")
 
     # 詳細は1行表示
