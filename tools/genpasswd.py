@@ -32,11 +32,9 @@ def main():
             length, include_numbers, include_special_chars, selected_special_chars
         )
         if password:
-            st.success("Password generated: " + password)
-
-            # 生成されたパスワードをクリップボードにコピー
-            copy_component("Copy to clipboard", content=password)
-
+            col1, col2 = st.columns([2, 3])
+            col1.success("生成されたパスワード:")
+            col2.code(password)
         else:
             st.error(
                 "Cannot generate password. Please select at least one character type (or add special characters)."
