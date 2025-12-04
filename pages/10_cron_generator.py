@@ -165,6 +165,6 @@ if st.button("Cron文字列を生成"):
         else:  # Spring cron
             cron_string = f"{second} {minute} {hour} {day} {month} {weekday}"
 
-        st.subheader("3. 生成されたCron文字列")
+        st.subheader("生成されたCron文字列")
         st.code(cron_string, language="bash")
         st.caption("この文字列をcrontabに追加してください。")
