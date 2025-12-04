@@ -38,7 +38,7 @@ def main():
     )
     st.page_link(
         "pages/10_cron_generator.py",
-        label="Cronスケジュールジェネレーターはこちら",
+        label="Cronジェネレーターはこちら",
         icon="⏰",
     )
     st.page_link(

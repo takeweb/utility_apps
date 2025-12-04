@@ -79,10 +79,10 @@ def select_single_range_or_customw2(label, options):
 
 
 # --- アプリの基本設定 ---
-st.set_page_config(page_title="Cronスケジュールジェネレーター", page_icon="⏰")
+st.set_page_config(page_title="Cronジェネレーター", page_icon="⏰")
 
 # --- タイトル ---
-st.title("⏰ Cronスケジュールジェネレーター")
+st.title("⏰ Cronジェネレーター")
 st.caption("Cron形式のスケジュール文字列を簡単に生成します。")
 
 # --- 入力フィールド ---
