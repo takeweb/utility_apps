@@ -123,13 +123,11 @@ weekday = select_single_range_or_customw2("曜日", weekday_options)
 # else:
 #     st.error(f"無効な曜日が選択されました: {weekday}")
 #     weekday = "*"
-st.divider()  # 区切り線
 
 # 実行ユーザとコマンドの入力フィールド
-st.subheader("実行ユーザとコマンドを設定")
-user = st.text_input("実行ユーザ", value="root")
-command = st.text_input("実行コマンド", value="/path/to/command")
-st.divider()  # 区切り線
+with st.expander("**実行ユーザとコマンドを設定**", expanded=True):
+    user = st.text_input("実行ユーザ", value="root")
+    command = st.text_input("実行コマンド", value="/path/to/command")
 
 # --- Cron文字列の生成 ---
 if st.button("Cron文字列を生成"):
