@@ -7,6 +7,8 @@ from lunardate import LunarDate
 from supabase import Client
 from libs.supabase_client import get_supabase_client
 from tools.wareki import convert_seireki_2_wareki
+import os
+import json
 
 
 def get_tz_time(tz_str):
@@ -28,187 +30,42 @@ def calculate_rokuyo(date):
     return rokuyo
 
 
-def plot_all_clocks_js_only(jst_offset_hours=9):
+def plot_all_clocks_js_only(jst_offset_hours=9, city_label="東京 (UTC+9)"):
     """
     デジタル時計とアナログ時計の両方をJSで自己更新する
     HTMLコンポーネントを「1回だけ」描画する関数
     （アナログ秒針をデジタルと同期させ、体感ズレを解消）
     """
 
-    html_code = f"""
-    <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+    # read external JS
+    this_dir = os.path.dirname(__file__)
+    js_path = os.path.join(this_dir, "clock.js")
+    try:
+        with open(js_path, "r", encoding="utf-8") as f:
+            js_content = f.read()
+    except Exception:
+        js_content = ""
 
-    <div id="digital_clock_display_jst" style="
-        font-family: 'Consolas', 'Menlo', 'Monaco', 'monospace';
-        font-size: 1.1rem;
-        padding-bottom: 1rem;
-    ">
-        現在時刻: --:--:--
-    </div>
-    <div id="digital_clock_display_utc" style="
-        font-family: 'Consolas', 'Menlo', 'Monaco', 'monospace';
-        font-size: 1.1rem;
-        padding-bottom: 1rem;
-    ">
-        現在時刻: --:--:--
-    </div>
+    # inject jst offset and city label into JS placeholder (always run)
+    js_content = js_content.replace("JST_OFFSET_PLACEHOLDER", str(jst_offset_hours))
+    # replace CITY_LABEL_PLACEHOLDER with a JS string literal (properly escaped)
+    js_content = js_content.replace(
+        "CITY_LABEL_PLACEHOLDER", json.dumps(city_label, ensure_ascii=False)
+    )
 
-
-    <div id="analog_clock_chart" style="width: 100%; height: 400px;"></div>
-
-    <script>
-        const chartDom = document.getElementById('analog_clock_chart');
-        const myChart = echarts.init(chartDom);
-        const digitalClockDomJst = document.getElementById('digital_clock_display_jst');
-        const digitalClockDomUtc = document.getElementById('digital_clock_display_utc');
-
-        const jstOffsetHours = {jst_offset_hours};
-
-        // アナログ時計のオプション
-        const option = {{
-            series: [
-                // 1. 時計盤
-                {{
-                    type: "gauge", startAngle: 90, endAngle: -270,
-                    min: 0, max: 12, splitNumber: 4,
-                    axisLine: {{ lineStyle: {{ width: 10 }} }},
-                    axisTick: {{ show: false }},
-                    splitLine: {{ length: 15, lineStyle: {{ width: 3 }} }},
-                    axisLabel: {{
-                        distance: 15, fontSize: 18,
-                        formatter: function(value) {{
-                            if (value === 0) {{ return ''; }} return value;
-                        }}
-                    }},
-                    pointer: {{ show: false }}, detail: {{ show: false }},
-                    animation: false,
-                }},
-                // 2. 時針
-                {{
-                    type: "gauge", startAngle: 90, endAngle: -270,
-                    min: 0, max: 12, axisLine: {{ show: false }},
-                    axisTick: {{ show: false }}, splitLine: {{ show: false }},
-                    axisLabel: {{ show: false }},
-                    pointer: {{ width: 8, length: "60%" }},
-                    detail: {{ show: false }}, animation: false,
-                    data: [{{ value: 0 }}]
-                }},
-                // 3. 分針
-                {{
-                    type: "gauge", startAngle: 90, endAngle: -270,
-                    min: 0, max: 60, axisLine: {{ show: false }},
-                    axisTick: {{ show: false }}, splitLine: {{ show: false }},
-                    axisLabel: {{ show: false }},
-                    pointer: {{ width: 4, length: "80%" }},
-                    detail: {{ show: false }}, animation: false,
-                    data: [{{ value: 0 }}]
-                }},
-                // 4. 秒針 (ズレ修正済み)
-                {{
-                    type: "gauge",
-                    startAngle: 90, endAngle: -270,
-                    min: 0, max: 60,
-                    "splitNumber": 12, // 5秒ごと
-                    "axisLine": {{ "show": false }},
-                    "axisTick": {{
-                        "show": true, "splitNumber": 5, "length": 8, // 1秒ごと
-                        "lineStyle": {{ "width": 1 }}
-                    }},
-                    "splitLine": {{
-                        "show": true, "length": 12, "lineStyle": {{ "width": 2 }}
-                    }},
-                    "axisLabel": {{ "show": false }},
-                    "pointer": {{ "width": 2, "length": "90%", "itemStyle": {{ "color": "red" }} }},
-                    "detail": {{ "show": false }}, "animation": false,
-                    "data": [{{ value: 0 }}]
-                }}
-            ]
-        }};
-
-        myChart.setOption(option);
-
-        // --- 時計を更新する関数 ---
-        function updateAllClocks() {{
-
-            // JST計算
-            const localNow = new Date();
-            const localOffsetMinutes = localNow.getTimezoneOffset();
-            const utcMillis = localNow.getTime() + (localOffsetMinutes * 60 * 1000);
-            const jstMillis = utcMillis + (jstOffsetHours * 60 * 60 * 1000);
-            const now = new Date(jstMillis);
-
-            // アナログ時計の計算
-            const h = (now.getHours() % 12) + now.getMinutes() / 60;
-            const m = now.getMinutes() + now.getSeconds() / 60;
-
-            // ----------------------------------------------------
-            // 修正点：ミリ秒を切り捨て、デジタル時計と同期させる
-            const s = now.getSeconds();
-            // ----------------------------------------------------
-
-            myChart.setOption({{
-                series: [
-                    {{}},
-                    {{ data: [{{ value: h }}] }},
-                    {{ data: [{{ value: m }}] }},
-                    {{ data: [{{ value: s }}] }},
-                ]
-            }});
-
-            // デジタル時計(JST)の計算と表示
-            const digital_h = String(now.getHours()).padStart(2, '0');
-            const digital_m = String(now.getMinutes()).padStart(2, '0');
-            const digital_s = String(now.getSeconds()).padStart(2, '0');
-            digitalClockDomJst.innerText = `JST: ${{digital_h}}:${{digital_m}}:${{digital_s}}`;
-
-            // デジタル時計(UTC)の計算と表示
-            const utc_h = String(localNow.getUTCHours()).padStart(2, '0');
-            const utc_m = String(localNow.getUTCMinutes()).padStart(2, '0');
-            const utc_s = String(localNow.getUTCSeconds()).padStart(2, '0');
-            digitalClockDomUtc.innerText = `UTC: ${{utc_h}}:${{utc_m}}:${{utc_s}}`;
-        }}
-
-        // --- 遅延蓄積を解消する再帰ループ ---
-        function tick() {{
-            // 1. 「次の秒の0ミリ秒」までの遅延を計算
-            const now = new Date();
-            const millis = now.getMilliseconds();
-            const delay = 1000 - millis;
-
-            // 2. 計算した遅延後に「更新と次のタイマーセット」を実行
-            setTimeout(() => {{
-                // 3. ほぼ0ミリ秒時点で時刻を更新（描画）
-                updateAllClocks();
-
-                // 4. 次のタイマー（tick自身）をセット
-                tick();
-            }}, delay);
-        }}
-
-        // 最初のタイマーだけセット
-        tick();
-
-        // ダークモードのスタイル適用時に、JSTとUTCのデジタル時計の背景色と文字色を設定
-        function applyDarkModeStyles(isDarkMode) {{
-            const textColor = isDarkMode ? '#FFFFFF' : '#000000';
-            const backgroundColor = isDarkMode ? '#333333' : '#FFFFFF';
-
-            digitalClockDomJst.style.color = textColor;
-            digitalClockDomUtc.style.color = textColor;
-
-            digitalClockDomJst.style.backgroundColor = backgroundColor;
-            digitalClockDomUtc.style.backgroundColor = backgroundColor;
-            chartDom.style.backgroundColor = backgroundColor; // アナログ時計の背景色も設定
-        }}
-
-        // ダークモードの検出と監視
-        const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-        applyDarkModeStyles(darkModeMediaQuery.matches);
-        darkModeMediaQuery.addEventListener('change', function(event) {{
-            applyDarkModeStyles(event.matches);
-        }});
-    </script>
-    """
+    html_code = (
+        '<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>'
+        + "\n\n"
+        + "<div id=\"digital_clock_display_utc\" style=\"font-family: 'Consolas', 'Menlo', 'Monaco', 'monospace'; font-size: 1.1rem; padding-bottom: 1rem;\">\n        現在時刻: --:--:--\n    </div>"
+        + "\n"
+        + "<div id=\"digital_clock_display_jst\" style=\"font-family: 'Consolas', 'Menlo', 'Monaco', 'monospace'; font-size: 1.1rem; padding-bottom: 1rem;\">\n        現在時刻: --:--:--\n    </div>"
+        + "\n\n"
+        + '<div id="analog_clock_chart" style="width: 100%; height: 400px;"></div>'
+        + "\n\n"
+        + "<script>"
+        + js_content
+        + "</script>"
+    )
 
     components.html(html_code, height=500)
 
@@ -265,8 +122,32 @@ def draw_clock():
     # 日付表示
     print_date(supabase_client)
 
-    # デジタル時計＆アナログ時計の表示
-    plot_all_clocks_js_only(jst_offset_hours=9)
+    # 時計表示オフセットを選択するセレクトボックス（都市ベース）
+    city_to_offset = {
+        "ニューヨーク (UTC-5)": -5,
+        "ロンドン (UTC+0)": 0,
+        "パリ (UTC+1)": 1,
+        "モスクワ (UTC+3)": 3,
+        "北京 (UTC+8)": 8,
+        "東京 (UTC+9)": 9,
+        "シドニー (UTC+11)": 11,
+    }
+
+    city_list = list(city_to_offset.keys())
+    # デフォルトは東京
+    default_index = (
+        city_list.index("東京 (UTC+9)") if "東京 (UTC+9)" in city_list else 0
+    )
+    selected_city = st.selectbox(
+        "表示する都市を選択してください:",
+        city_list,
+        index=default_index,
+        key="clock_offset_select",
+    )
+    selected_offset = city_to_offset.get(selected_city, 9)
+
+    # デジタル時計＆アナログ時計の表示（選択したオフセットと都市ラベルで）
+    plot_all_clocks_js_only(jst_offset_hours=selected_offset, city_label=selected_city)
 
 
 if __name__ == "__main__":
