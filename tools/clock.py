@@ -30,7 +30,7 @@ def calculate_rokuyo(date):
     return rokuyo
 
 
-def plot_all_clocks_js_only(jst_offset_hours=9, city_label="東京 (UTC+9)"):
+def plot_all_clocks_js_only(other_offset_hours=-8, city_label="L.A. (UTC-8)"):
     """
     デジタル時計とアナログ時計の両方をJSで自己更新する
     HTMLコンポーネントを「1回だけ」描画する関数
@@ -46,21 +46,25 @@ def plot_all_clocks_js_only(jst_offset_hours=9, city_label="東京 (UTC+9)"):
     except Exception:
         js_content = ""
 
-    # inject jst offset and city label into JS placeholder (always run)
-    js_content = js_content.replace("JST_OFFSET_PLACEHOLDER", str(jst_offset_hours))
+    # inject offsets and city label into JS placeholders (always run)
+    # jst is fixed in JS; replace only the other offset placeholder
+    js_content = js_content.replace("OTHER_OFFSET_PLACEHOLDER", str(other_offset_hours))
     # replace CITY_LABEL_PLACEHOLDER with a JS string literal (properly escaped)
     js_content = js_content.replace(
         "CITY_LABEL_PLACEHOLDER", json.dumps(city_label, ensure_ascii=False)
     )
 
+    # layout: three time columns aligned horizontally, chart below
     html_code = (
         '<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>'
-        + "\n\n"
-        + "<div id=\"digital_clock_display_utc\" style=\"font-family: 'Consolas', 'Menlo', 'Monaco', 'monospace'; font-size: 1.1rem; padding-bottom: 1rem;\">\n        現在時刻: --:--:--\n    </div>"
         + "\n"
-        + "<div id=\"digital_clock_display_jst\" style=\"font-family: 'Consolas', 'Menlo', 'Monaco', 'monospace'; font-size: 1.1rem; padding-bottom: 1rem;\">\n        現在時刻: --:--:--\n    </div>"
-        + "\n\n"
-        + '<div id="analog_clock_chart" style="width: 100%; height: 400px;"></div>'
+        + '<div style="display:flex; gap:1rem; align-items:center; justify-content:space-around; margin-bottom:1rem;">'
+        + '<div id="digital_clock_display_jst" style="flex:1; text-align:center; font-family: "Consolas", "Menlo", "Monaco", monospace; font-size:1.1rem; padding:0.5rem;">JST: --:--:--</div>'
+        + '<div id="digital_clock_display_utc" style="flex:1; text-align:center; font-family: "Consolas", "Menlo", "Monaco", monospace; font-size:1.1rem; padding:0.5rem;">UTC: --:--:--</div>'
+        + '<div id="digital_clock_display_other" style="flex:1; text-align:center; font-family: "Consolas", "Menlo", "Monaco", monospace; font-size:1.1rem; padding:0.5rem;">Other: --:--:--</div>'
+        + "</div>"
+        + "\n"
+        + '<div id="analog_clock_chart" style="width:100%; height:400px;"></div>'
         + "\n\n"
         + "<script>"
         + js_content
@@ -124,19 +128,37 @@ def draw_clock():
 
     # 時計表示オフセットを選択するセレクトボックス（都市ベース）
     city_to_offset = {
-        "ニューヨーク (UTC-5)": -5,
         "ロンドン (UTC+0)": 0,
         "パリ (UTC+1)": 1,
+        "カイロ (UTC+2)": 2,
         "モスクワ (UTC+3)": 3,
+        "ドバイ (UTC+4)": 4,
+        "イスラマバード (UTC+5)": 5,
+        "ダッカ (UTC+6)": 6,
+        "バンコク (UTC+7)": 7,
         "北京 (UTC+8)": 8,
         "東京 (UTC+9)": 9,
-        "シドニー (UTC+11)": 11,
+        "シドニー (UTC+10)": 10,
+        "ホニソラ (UTC+11)": 11,
+        "カムチャッカ (UTC+12)": 12,
+        "ベーカー島 (UTC-12)": -12,
+        "ミッドウェー島 (UTC-11)": -11,
+        "ホノルル (UTC-10)": -10,
+        "アラスカ州 (UTC-9)": -9,
+        "L.A. (UTC-8)": -8,
+        "デンバー (UTC-7)": -7,
+        "シカゴ (UTC-6)": -6,
+        "ニューヨーク (UTC-5)": -5,
+        "サンディエゴ (UTC-4)": -4,
+        "ブエノスアイレス (UTC-3)": -3,
+        "サウスジョージア (UTC-2)": -2,
+        "アルバ諸島 (UTC-1)": -1,
     }
 
     city_list = list(city_to_offset.keys())
-    # デフォルトは東京
+    # デフォルトは L.A.
     default_index = (
-        city_list.index("東京 (UTC+9)") if "東京 (UTC+9)" in city_list else 0
+        city_list.index("L.A. (UTC-8)") if "L.A. (UTC-8)" in city_list else 0
     )
     selected_city = st.selectbox(
         "表示する都市を選択してください:",
@@ -144,10 +166,12 @@ def draw_clock():
         index=default_index,
         key="clock_offset_select",
     )
-    selected_offset = city_to_offset.get(selected_city, 9)
+    selected_offset = city_to_offset.get(selected_city, -8)
 
     # デジタル時計＆アナログ時計の表示（選択したオフセットと都市ラベルで）
-    plot_all_clocks_js_only(jst_offset_hours=selected_offset, city_label=selected_city)
+    plot_all_clocks_js_only(
+        other_offset_hours=selected_offset, city_label=selected_city
+    )
 
 
 if __name__ == "__main__":

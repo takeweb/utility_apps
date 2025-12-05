@@ -3,25 +3,30 @@
 // - #analog_clock_chart
 // - #digital_clock_display_jst
 // - #digital_clock_display_utc
-// The placeholder /*JST_OFFSET_PLACEHOLDER*/ will be replaced by Python with the numeric offset.
+// The placeholder /*OTHER_OFFSET_PLACEHOLDER*/ will be replaced by Python with the numeric offset.
 
 const chartDom = document.getElementById("analog_clock_chart");
 const myChart = echarts.init(chartDom);
 const digitalClockDomJst = document.getElementById("digital_clock_display_jst");
 const digitalClockDomUtc = document.getElementById("digital_clock_display_utc");
+const digitalClockDomOther = document.getElementById(
+  "digital_clock_display_other"
+);
 
-// JST offset placeholder: when embedding from Python, the identifier
-// `JST_OFFSET_PLACEHOLDER` will be replaced with a number. To keep
-// this file valid JavaScript on its own (for linting/editing), we
-// resolve it safely with a fallback of 9 (JST).
-const jstOffsetHours =
-  typeof JST_OFFSET_PLACEHOLDER !== "undefined" ? JST_OFFSET_PLACEHOLDER : 9;
+// JST is fixed
+const jstOffsetHours = 9;
 
-// City label placeholder: replaced by Python with a JS string literal
+// otherOffsetHours placeholder: replaced by Python with numeric offset
+const otherOffsetHours =
+  typeof OTHER_OFFSET_PLACEHOLDER !== "undefined"
+    ? OTHER_OFFSET_PLACEHOLDER
+    : -8;
+
+// City label placeholder: replaced by Python with a JS string literal for the "other" timezone
 const cityLabel =
   typeof CITY_LABEL_PLACEHOLDER !== "undefined"
     ? CITY_LABEL_PLACEHOLDER
-    : "JST(UTC+9)";
+    : "Other (UTC)";
 
 // アナログ時計のオプション
 const option = {
@@ -131,16 +136,27 @@ function updateAllClocks() {
     ],
   });
 
-  // デジタル表示
+  // デジタル表示（JST 固定）
   const digital_h = String(now.getHours()).padStart(2, "0");
   const digital_m = String(now.getMinutes()).padStart(2, "0");
   const digital_s = String(now.getSeconds()).padStart(2, "0");
-  digitalClockDomJst.innerText = `${cityLabel}: ${digital_h}:${digital_m}:${digital_s}`;
+  digitalClockDomJst.innerText = `JST(UTC+9): ${digital_h}:${digital_m}:${digital_s}`;
 
+  // UTC 表示
   const utc_h = String(localNow.getUTCHours()).padStart(2, "0");
   const utc_m = String(localNow.getUTCMinutes()).padStart(2, "0");
   const utc_s = String(localNow.getUTCSeconds()).padStart(2, "0");
   digitalClockDomUtc.innerText = `UTC: ${utc_h}:${utc_m}:${utc_s}`;
+
+  // Other（選択されたオフセット）の計算と表示
+  const otherMillis = utcMillis + otherOffsetHours * 60 * 60 * 1000;
+  const otherNow = new Date(otherMillis);
+  const other_h = String(otherNow.getHours()).padStart(2, "0");
+  const other_m = String(otherNow.getMinutes()).padStart(2, "0");
+  const other_s = String(otherNow.getSeconds()).padStart(2, "0");
+  if (digitalClockDomOther) {
+    digitalClockDomOther.innerText = `${cityLabel}: ${other_h}:${other_m}:${other_s}`;
+  }
 }
 
 function tick() {
