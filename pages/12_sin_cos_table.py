@@ -29,10 +29,13 @@ try:
     default_idx = angles_for_select.index(st.session_state["highlight_angle"])
 except ValueError:
     default_idx = 0
-selection = st.selectbox(
-    "ハイライトする角度 (°)", options=angles_for_select, index=default_idx
+# use the selectbox to directly bind into session_state to avoid transient resets
+st.selectbox(
+    "ハイライトする角度 (°)",
+    options=angles_for_select,
+    index=default_idx,
+    key="highlight_angle",
 )
-st.session_state["highlight_angle"] = selection
 highlight_angle = st.session_state["highlight_angle"]
 
 angles = list(range(0, 361, step))
