@@ -2,12 +2,13 @@ import numpy as np
 import matplotlib.pyplot as plt
 import streamlit as st
 
-def gen_cosine_chart(num_points):
+
+def gen_cosine_wave_chart(num_points):
     """Cosine (cos) グラフを描画する関数"""
     with st.expander("**コサイン波 (cos) グラフ**", expanded=True):
         # スライダーでX軸の範囲を選択 (Select X-axis range with sliders)
-        x_min = st.slider('Cosine: X軸の最小値', -10, 0, -10, key="x_min_cos")
-        x_max = st.slider('Cosine: X軸の最大値', 0, 10, 10, key="x_max_cos")
+        x_min = st.slider("Cosine: X軸の最小値", -10, 0, -10, key="x_min_cos")
+        x_max = st.slider("Cosine: X軸の最大値", 0, 10, 10, key="x_max_cos")
 
         # xの値を生成 (Generate x values for cos)
         x = np.linspace(x_min, x_max, num_points)
@@ -15,15 +16,16 @@ def gen_cosine_chart(num_points):
 
         # グラフ描画 (Plotting the cos graph)
         fig, ax = plt.subplots()
-        ax.plot(x, y_cos, label='cos(x)', color='blue') # 色を青に変更（お好みで）
-        ax.set_title('Cosine Wave')
-        ax.set_xlabel('x')
-        ax.set_ylabel('cos(x)')
+        ax.plot(x, y_cos, label="cos(x)", color="blue")  # 色を青に変更（お好みで）
+        ax.set_title("Cosine Wave")
+        ax.set_xlabel("x")
+        ax.set_ylabel("cos(x)")
         ax.legend()
         ax.grid(True)
         st.pyplot(fig)
 
-def gen_arccosine_chart(num_points):
+
+def gen_arccosine_wave_chart(num_points):
     """Arccosine (arccos) グラフを描画する関数"""
     with st.expander("**アークコサイン波 (arccos) グラフ**", expanded=True):
         # arccos の定義域 ([-1, 1]) についての注釈
@@ -41,10 +43,10 @@ def gen_arccosine_chart(num_points):
 
         # グラフ描画 (Plotting the arccos graph)
         fig, ax = plt.subplots()
-        ax.plot(x_acos, y_acos, label='arccos(x)', color='green') # 色を緑に設定
-        ax.set_title('Arccosine Wave')
-        ax.set_xlabel('x')
-        ax.set_ylabel('arccos(x)')
+        ax.plot(x_acos, y_acos, label="arccos(x)", color="green")  # 色を緑に設定
+        ax.set_title("Arccosine Wave")
+        ax.set_xlabel("x")
+        ax.set_ylabel("arccos(x)")
         ax.legend()
         ax.grid(True)
         st.pyplot(fig)

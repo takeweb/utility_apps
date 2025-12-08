@@ -46,6 +46,11 @@ def main():
         label="IEEE 754 可視化ツールはこちら",
         icon="⚙️",
     )
+    st.page_link(
+        "pages/12_sin_cos_table.py",
+        label="sin、cosと単位円の角度の関係はこちら",
+        icon="⚪️",
+    )
 
     st.divider()  # 区切り線
 

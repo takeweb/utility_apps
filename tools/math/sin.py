@@ -2,12 +2,13 @@ import numpy as np
 import matplotlib.pyplot as plt
 import streamlit as st
 
-def gen_sine_chart(num_points):
+
+def gen_sine_wave_chart(num_points):
     """Sine (sin) グラフを描画する関数"""
     with st.expander("**サイン波 (sin) グラフ**", expanded=True):
         # スライダーでX軸の範囲を選択 (Select X-axis range with sliders)
-        x_min_sin = st.slider('Sine: X軸の最小値', -10, 0, -10, key='sin_min')
-        x_max_sin = st.slider('Sine: X軸の最大値', 0, 10, 10, key='sin_max')
+        x_min_sin = st.slider("Sine: X軸の最小値", -10, 0, -10, key="sin_min")
+        x_max_sin = st.slider("Sine: X軸の最大値", 0, 10, 10, key="sin_max")
 
         # xの値を生成 (Generate x values for sin)
         x_sin = np.linspace(x_min_sin, x_max_sin, num_points)
@@ -15,15 +16,16 @@ def gen_sine_chart(num_points):
 
         # グラフ描画 (Plotting the sin graph)
         fig, ax = plt.subplots()
-        ax.plot(x_sin, y_sin, label='sin(x)', color='blue')
-        ax.set_title('Sine Wave')
-        ax.set_xlabel('x')
-        ax.set_ylabel('sin(x)')
+        ax.plot(x_sin, y_sin, label="sin(x)", color="blue")
+        ax.set_title("Sine Wave")
+        ax.set_xlabel("x")
+        ax.set_ylabel("sin(x)")
         ax.legend()
         ax.grid(True)
         st.pyplot(fig)
 
-def gen_arcsine_chart(num_points):
+
+def gen_arcsine_wave_chart(num_points):
     """Arcsine (arcsin) グラフを描画する関数"""
     with st.expander("**アークサイン波 (arcsin) グラフ**", expanded=True):
         # arcsin の定義域 ([-1, 1]) についての注釈
@@ -41,10 +43,10 @@ def gen_arcsine_chart(num_points):
 
         # グラフ描画 (Plotting the arcsin graph)
         fig, ax = plt.subplots()
-        ax.plot(x_asin, y_asin, label='arcsin(x)', color='red')
-        ax.set_title('Arcsine Wave')
-        ax.set_xlabel('x')
-        ax.set_ylabel('arcsin(x)')
+        ax.plot(x_asin, y_asin, label="arcsin(x)", color="red")
+        ax.set_title("Arcsine Wave")
+        ax.set_xlabel("x")
+        ax.set_ylabel("arcsin(x)")
         ax.legend()
         ax.grid(True)
         st.pyplot(fig)
