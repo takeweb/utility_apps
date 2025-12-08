@@ -40,24 +40,32 @@ st.subheader(f"0° 〜 360° (step {step}°)")
 
 angles = list(range(0, 361, step))
 
-# 主要角の正確値マップ (sin, cos) を文字列で定義
+# 主要角の正確値マップ (sin, cos) を文字列で定義（15°刻み）
 exact_map = {
     0: ("0", "1"),
+    15: ("(√6-√2)/4", "(√6+√2)/4"),
     30: ("1/2", "√3/2"),
     45: ("√2/2", "√2/2"),
     60: ("√3/2", "1/2"),
+    75: ("(√6+√2)/4", "(√6-√2)/4"),
     90: ("1", "0"),
+    105: ("(√6+√2)/4", "-(√6-√2)/4"),
     120: ("√3/2", "-1/2"),
     135: ("√2/2", "-√2/2"),
     150: ("1/2", "-√3/2"),
+    165: ("(√6-√2)/4", "-(√6+√2)/4"),
     180: ("0", "-1"),
+    195: ("-(√6-√2)/4", "-(√6+√2)/4"),
     210: ("-1/2", "-√3/2"),
     225: ("-√2/2", "-√2/2"),
     240: ("-√3/2", "-1/2"),
+    255: ("-(√6+√2)/4", "-(√6-√2)/4"),
     270: ("-1", "0"),
+    285: ("-(√6+√2)/4", "(√6-√2)/4"),
     300: ("-√3/2", "1/2"),
     315: ("-√2/2", "√2/2"),
     330: ("-1/2", "√3/2"),
+    345: ("-(√6-√2)/4", "(√6+√2)/4"),
     360: ("0", "1"),
 }
 
@@ -165,13 +173,11 @@ try:
     ax.set_ylim(-1.1, 1.1)
     ax.set_xlabel("x = cosθ")
     ax.set_ylabel("y = sinθ")
-    title_text = (
+    # タイトルは matplotlib に描画すると環境依存で文字化けすることがあるため
+    # Streamlit 側で描画する（ブラウザのフォントで表示される）
+    st.subheader(
         f"単位円 — ハイライト: {highlight_angle}° (cos(θ)={hx:.3f}, sin(θ)={hy:.3f})"
     )
-    if font_prop:
-        ax.set_title(title_text, fontproperties=font_prop)
-    else:
-        ax.set_title(title_text)
     st.pyplot(fig)
 except Exception:
     # matplotlib が無いなどで描画できない場合は、フォールバックで SVG による描画を行います。
@@ -200,10 +206,12 @@ except Exception:
   <!-- labels -->
   <text x="{cx + r + 8}" y="{cy}" font-size="12" fill="#333">x = cosθ</text>
   <text x="{cx}" y="{cy - r - 8}" font-size="12" fill="#333">y = sinθ</text>
-  <text x="10" y="20" font-size="14" fill="#000">単位円 — ハイライト: {highlight_angle}° (x={(math.cos(ha)):.3f}, y={(math.sin(ha)):.3f})</text>
 </svg>'''
-
         components.html(svg, height=size + 20)
+        # SVG 上のタイトルも Streamlit 側で表示（SVG 内には日本語を入れない）
+        st.subheader(
+            f"単位円 — ハイライト: {highlight_angle}° (x={(math.cos(ha)):.3f}, y={(math.sin(ha)):.3f})"
+        )
     except Exception:
         st.info(
             "単位円を描画できませんでした（matplotlib/numpy が無く、SVG 埋め込みにも失敗しました）。"
