@@ -35,9 +35,6 @@ selection = st.selectbox(
 st.session_state["highlight_angle"] = selection
 highlight_angle = st.session_state["highlight_angle"]
 
-# 表と単位円を縦に並べて表示 (表 -> 円)
-st.subheader(f"0° 〜 360° (step {step}°)")
-
 angles = list(range(0, 361, step))
 
 # 主要角の正確値マップ (sin, cos) を文字列で定義（15°刻み）
@@ -68,6 +65,9 @@ exact_map = {
     345: ("-(√6-√2)/4", "(√6+√2)/4"),
     360: ("0", "1"),
 }
+
+# 表と単位円を縦に並べて表示
+st.subheader(f"0° 〜 360° (step {step}°)")
 
 # 表データを作成
 rows = []
