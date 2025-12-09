@@ -9,16 +9,15 @@ st.caption("度(°) とラジアン、sin/cos、単位円上の座標を確認�
 
 # 設定エリア（上段にまとめる）
 settings_cols = st.columns([1, 1, 1, 1])
-step = settings_cols[0].selectbox(
-    "表示ステップ（度）",
-    options=[1, 2, 5, 10, 15, 30],
-    index=4,
-    help="何度刻みで表を作るかを選択します",
-)
+# 表示ステップは 15° に固定
+step = 15
+settings_cols[0].write("表示ステップ（度）: 15（固定）")
 show_radians = settings_cols[1].checkbox("ラジアンを表示する", value=True)
 show_cos = settings_cols[2].checkbox("cos も表示する", value=True)
 show_exact = settings_cols[3].checkbox(
-    "主要角の正確値を表示 (例: 30° -> 1/2)", value=True
+    "主要角（15°刻み）の計算式で表示する",
+    value=True,
+    help="主要角（15°刻み）の計算式で表示する（√や分数など）。チェックを外すと小数表示になります。",
 )
 
 # ハイライト角選択（step に連動）
