@@ -24,7 +24,7 @@ show_exact = settings_cols[3].checkbox(
 # ハイライト角選択（step に連動）
 # session_state に既定値をセットしてから、selectbox は key のみ指定する（index と key を同時に渡すと警告の原因になる）
 if "highlight_angle" not in st.session_state:
-    st.session_state["highlight_angle"] = 90
+    st.session_state["highlight_angle"] = 30
 angles_for_select = list(range(0, 361, step))
 # selectbox は session_state の値を使う（index を渡さない）
 st.selectbox(
@@ -158,8 +158,34 @@ try:
     ha = math.radians(highlight_angle)
     hx = math.cos(ha)
     hy = math.sin(ha)
+    # 半径（原点から点へ）
     ax.plot([0, hx], [0, hy], color="#1f77b4", linewidth=2)
     ax.scatter([hx], [hy], color="#d62728", zorder=5)
+
+    # 直角三角形の辺（x 軸への射影と垂直辺）を描画
+    # 横辺: (0,0) -> (hx,0)
+    ax.plot([0, hx], [0, 0], color="#2ca02c", linewidth=2)
+    # 縦辺: (hx,0) -> (hx,hy)
+    ax.plot([hx, hx], [0, hy], color="#2ca02c", linewidth=2)
+    # 三角形の内部を薄く塗る（視覚的補助）
+    ax.fill([0, hx, hx], [0, 0, hy], color="#2ca02c", alpha=0.08)
+
+    # sin/cos の数値ラベルを追加（日本語やギリシャ文字は環境依存で化ける可能性があるため英字と数値で表示）
+    try:
+        # 横辺の中央に cos 値を表示
+        ax.text(hx / 2.0, -0.06, f"cos={hx:.3f}", ha="center", va="top", fontsize=9)
+        # 縦辺の中央に sin 値を表示（x 側に寄せる）
+        x_label_pos = hx + 0.03 if hx >= 0 else hx - 0.03
+        ax.text(
+            x_label_pos,
+            hy / 2.0,
+            f"sin={hy:.3f}",
+            ha="left" if hx >= 0 else "right",
+            va="center",
+            fontsize=9,
+        )
+    except Exception:
+        pass
 
     ax.set_aspect("equal", "box")
     ax.set_xlim(-1.1, 1.1)
@@ -186,20 +212,28 @@ except Exception:
         hy = cy - r * math.sin(ha)
 
         svg = f'''<svg width="{size}" height="{size}" viewBox="0 0 {size} {size}" xmlns="http://www.w3.org/2000/svg">
-  <rect width="100%" height="100%" fill="white" />
-  <!-- circle -->
-  <circle cx="{cx}" cy="{cy}" r="{r}" stroke="#777777" stroke-width="2" fill="none" />
-  <!-- axes -->
-  <line x1="0" y1="{cy}" x2="{size}" y2="{cy}" stroke="#cccccc" stroke-width="1" />
-  <line x1="{cx}" y1="0" x2="{cx}" y2="{size}" stroke="#cccccc" stroke-width="1" />
-  <!-- radius -->
-  <line x1="{cx}" y1="{cy}" x2="{hx:.3f}" y2="{hy:.3f}" stroke="#1f77b4" stroke-width="3" />
-  <!-- point -->
-  <circle cx="{hx:.3f}" cy="{hy:.3f}" r="6" fill="#d62728" />
-  <!-- labels -->
-  <text x="{cx + r + 8}" y="{cy}" font-size="12" fill="#333">x = cosθ</text>
-  <text x="{cx}" y="{cy - r - 8}" font-size="12" fill="#333">y = sinθ</text>
-</svg>'''
+        <rect width="100%" height="100%" fill="white" />
+        <!-- circle -->
+        <circle cx="{cx}" cy="{cy}" r="{r}" stroke="#777777" stroke-width="2" fill="none" />
+        <!-- axes -->
+        <line x1="0" y1="{cy}" x2="{size}" y2="{cy}" stroke="#cccccc" stroke-width="1" />
+        <line x1="{cx}" y1="0" x2="{cx}" y2="{size}" stroke="#cccccc" stroke-width="1" />
+        <!-- radius -->
+        <line x1="{cx}" y1="{cy}" x2="{hx:.3f}" y2="{hy:.3f}" stroke="#1f77b4" stroke-width="3" />
+        <!-- right-triangle legs -->
+        <line x1="{cx}" y1="{cy}" x2="{hx:.3f}" y2="{cy}" stroke="#2ca02c" stroke-width="3" />
+        <line x1="{hx:.3f}" y1="{cy}" x2="{hx:.3f}" y2="{hy:.3f}" stroke="#2ca02c" stroke-width="3" />
+        <!-- fill triangle -->
+        <polygon points="{cx},{cy} {hx:.3f},{cy} {hx:.3f},{hy:.3f}" fill="#2ca02c" fill-opacity="0.08" />
+        <!-- point -->
+        <circle cx="{hx:.3f}" cy="{hy:.3f}" r="6" fill="#d62728" />
+        <!-- labels -->
+        <text x="{cx + r + 8}" y="{cy}" font-size="12" fill="#333">x = cosθ</text>
+        <text x="{cx}" y="{cy - r - 8}" font-size="12" fill="#333">y = sinθ</text>
+        <!-- numeric labels for cos/sin -->
+        <text x="{(cx + hx) / 2.0:.3f}" y="{cy + 18}" font-size="12" fill="#2ca02c" text-anchor="middle">cos={math.cos(ha):.3f}</text>
+        <text x="{hx + 12:.3f}" y="{(cy + hy) / 2.0:.3f}" font-size="12" fill="#2ca02c" text-anchor="start">sin={math.sin(ha):.3f}</text>
+    </svg>'''
         components.html(svg, height=size + 20)
         # SVG 上のタイトルも Streamlit 側で表示（SVG 内には日本語を入れない）
         st.subheader(
