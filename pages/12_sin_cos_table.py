@@ -12,10 +12,10 @@ settings_cols = st.columns([1, 1, 1, 1])
 # 表示ステップは 15° に固定
 step = 15
 settings_cols[0].write("表示ステップ（度）: 15（固定）")
-show_radians = settings_cols[1].checkbox("ラジアンを表示する", value=True)
-show_cos = settings_cols[2].checkbox("cos も表示する", value=True)
+show_radians = settings_cols[1].checkbox("ラジアン表示有り", value=True)
+show_cos = settings_cols[2].checkbox("cos表示あり", value=True)
 show_exact = settings_cols[3].checkbox(
-    "計算式で表示する",
+    "計算式表示",
     value=True,
     help="主要角（15°刻み）の計算式で表示する（√や分数など）。チェックを外すと小数表示になります。",
 )
