@@ -15,7 +15,7 @@ settings_cols[0].write("表示ステップ（度）: 15（固定）")
 show_radians = settings_cols[1].checkbox("ラジアンを表示する", value=True)
 show_cos = settings_cols[2].checkbox("cos も表示する", value=True)
 show_exact = settings_cols[3].checkbox(
-    "主要角（15°刻み）の計算式で表示する",
+    "計算式で表示する",
     value=True,
     help="主要角（15°刻み）の計算式で表示する（√や分数など）。チェックを外すと小数表示になります。",
 )
