@@ -22,18 +22,14 @@ show_exact = settings_cols[3].checkbox(
 )
 
 # ハイライト角選択（step に連動）
+# session_state に既定値をセットしてから、selectbox は key のみ指定する（index と key を同時に渡すと警告の原因になる）
 if "highlight_angle" not in st.session_state:
     st.session_state["highlight_angle"] = 90
 angles_for_select = list(range(0, 361, step))
-try:
-    default_idx = angles_for_select.index(st.session_state["highlight_angle"])
-except ValueError:
-    default_idx = 0
-# use the selectbox to directly bind into session_state to avoid transient resets
+# selectbox は session_state の値を使う（index を渡さない）
 st.selectbox(
     "ハイライトする角度 (°)",
     options=angles_for_select,
-    index=default_idx,
     key="highlight_angle",
 )
 highlight_angle = st.session_state["highlight_angle"]
@@ -82,13 +78,9 @@ for deg in angles:
     if show_exact and deg in exact_map:
         sin_val = exact_map[deg][0]
         cos_val = exact_map[deg][1]
-        unit_x = cos_val
-        unit_y = sin_val
     else:
         sin_val = f"{s:.6f}"
         cos_val = f"{c:.6f}"
-        unit_x = f"{c:.6f}"
-        unit_y = f"{s:.6f}"
 
     row = {
         "deg(°)": deg,
@@ -98,8 +90,6 @@ for deg in angles:
     row["sin(θ)"] = sin_val
     if show_cos:
         row["cos(θ)"] = cos_val
-    row["unit_x (cos)"] = unit_x
-    row["unit_y (sin)"] = unit_y
 
     rows.append(row)
 
@@ -228,8 +218,21 @@ try:
             deg = int(row["deg(°)"])
         except Exception:
             return ["" for _ in row]
+        # Streamlit のテーマを検出して、ライト/ダークで見やすい色を選択
+        try:
+            theme_base = st.get_option("theme.base")
+        except Exception:
+            theme_base = "light"
+
+        if theme_base == "dark":
+            # ダークモードでは薄いブルー系のハイライト（白文字上で十分なコントラスト）
+            highlight_style = "background-color: rgba(31,119,180,0.25);"
+        else:
+            # ライトモードでは既存の黄色系ハイライト
+            highlight_style = "background-color: #fff2a8;"
+
         if deg == int(highlight_angle):
-            return ["background-color: #fff2a8" for _ in row]
+            return [highlight_style for _ in row]
         return ["" for _ in row]
 
     styler = df.style.apply(_highlight_row, axis=1)
