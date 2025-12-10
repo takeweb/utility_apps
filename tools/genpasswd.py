@@ -1,7 +1,6 @@
 import random
 import string
 import streamlit as st
-from clipboard_component import copy_component
 
 
 def main():
