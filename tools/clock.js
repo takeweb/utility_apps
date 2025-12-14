@@ -1,12 +1,21 @@
 // Clock script extracted from Python HTML embed
 // This file expects the following DOM elements to exist in the host HTML:
-// - #analog_clock_chart
+// - #analog_clock_jst
+// - #analog_clock_utc
+// - #analog_clock_other
 // - #digital_clock_display_jst
 // - #digital_clock_display_utc
+// - #digital_clock_display_other
 // The placeholder /*OTHER_OFFSET_PLACEHOLDER*/ will be replaced by Python with the numeric offset.
 
-const chartDom = document.getElementById("analog_clock_chart");
-const myChart = echarts.init(chartDom);
+// three chart containers (JST / UTC / Other)
+const chartDomJst = document.getElementById("analog_clock_jst");
+const chartDomUtc = document.getElementById("analog_clock_utc");
+const chartDomOther = document.getElementById("analog_clock_other");
+const myChartJst = chartDomJst ? echarts.init(chartDomJst) : null;
+const myChartUtc = chartDomUtc ? echarts.init(chartDomUtc) : null;
+const myChartOther = chartDomOther ? echarts.init(chartDomOther) : null;
+
 const digitalClockDomJst = document.getElementById("digital_clock_display_jst");
 const digitalClockDomUtc = document.getElementById("digital_clock_display_utc");
 const digitalClockDomOther = document.getElementById(
@@ -113,47 +122,90 @@ const option = {
   ],
 };
 
-myChart.setOption(option);
+if (myChartJst) myChartJst.setOption(option);
+if (myChartUtc) myChartUtc.setOption(option);
+if (myChartOther) myChartOther.setOption(option);
 
 // 時計を更新する関数
 function updateAllClocks() {
   const localNow = new Date();
   const localOffsetMinutes = localNow.getTimezoneOffset();
   const utcMillis = localNow.getTime() + localOffsetMinutes * 60 * 1000;
+
+  // JST clock
   const jstMillis = utcMillis + jstOffsetHours * 60 * 60 * 1000;
-  const now = new Date(jstMillis);
+  const nowJst = new Date(jstMillis);
+  const hJst = (nowJst.getHours() % 12) + nowJst.getMinutes() / 60;
+  const mJst = nowJst.getMinutes() + nowJst.getSeconds() / 60;
+  const sJst = nowJst.getSeconds();
+  if (myChartJst) {
+    myChartJst.setOption({
+      series: [
+        {},
+        { data: [{ value: hJst }] },
+        { data: [{ value: mJst }] },
+        { data: [{ value: sJst }] },
+      ],
+    });
+  }
 
-  const h = (now.getHours() % 12) + now.getMinutes() / 60;
-  const m = now.getMinutes() + now.getSeconds() / 60;
-  const s = now.getSeconds();
+  // UTC clock
+  const nowUtc = new Date(utcMillis);
+  const hUtc = (nowUtc.getHours() % 12) + nowUtc.getMinutes() / 60;
+  const mUtc = nowUtc.getMinutes() + nowUtc.getSeconds() / 60;
+  const sUtc = nowUtc.getSeconds();
+  if (myChartUtc) {
+    myChartUtc.setOption({
+      series: [
+        {},
+        { data: [{ value: hUtc }] },
+        { data: [{ value: mUtc }] },
+        { data: [{ value: sUtc }] },
+      ],
+    });
+  }
 
-  myChart.setOption({
-    series: [
-      {},
-      { data: [{ value: h }] },
-      { data: [{ value: m }] },
-      { data: [{ value: s }] },
-    ],
-  });
+  // Other clock (selected offset)
+  const otherMillis = utcMillis + otherOffsetHours * 60 * 60 * 1000;
+  const nowOther = new Date(otherMillis);
+  const hOther = (nowOther.getHours() % 12) + nowOther.getMinutes() / 60;
+  const mOther = nowOther.getMinutes() + nowOther.getSeconds() / 60;
+  const sOther = nowOther.getSeconds();
+  if (myChartOther) {
+    myChartOther.setOption({
+      series: [
+        {},
+        { data: [{ value: hOther }] },
+        { data: [{ value: mOther }] },
+        { data: [{ value: sOther }] },
+      ],
+    });
+  }
 
   // デジタル表示（JST 固定）
-  const digital_h = String(now.getHours()).padStart(2, "0");
-  const digital_m = String(now.getMinutes()).padStart(2, "0");
-  const digital_s = String(now.getSeconds()).padStart(2, "0");
-  digitalClockDomJst.innerText = `JST(UTC+9): ${digital_h}:${digital_m}:${digital_s}`;
+  const digital_h = String(nowJst.getHours()).padStart(2, "0");
+  const digital_m = String(nowJst.getMinutes()).padStart(2, "0");
+  const digital_s = String(nowJst.getSeconds()).padStart(2, "0");
+  if (digitalClockDomJst)
+    digitalClockDomJst.innerText = `JST(UTC+9): ${digital_h}:${digital_m}:${digital_s}`;
 
   // UTC 表示
-  const utc_h = String(localNow.getUTCHours()).padStart(2, "0");
-  const utc_m = String(localNow.getUTCMinutes()).padStart(2, "0");
-  const utc_s = String(localNow.getUTCSeconds()).padStart(2, "0");
-  digitalClockDomUtc.innerText = `UTC: ${utc_h}:${utc_m}:${utc_s}`;
+  const utc_h = String(
+    nowUtc.getUTCHours ? nowUtc.getUTCHours() : nowUtc.getHours()
+  ).padStart(2, "0");
+  const utc_m = String(
+    nowUtc.getUTCMinutes ? nowUtc.getUTCMinutes() : nowUtc.getMinutes()
+  ).padStart(2, "0");
+  const utc_s = String(
+    nowUtc.getUTCSeconds ? nowUtc.getUTCSeconds() : nowUtc.getSeconds()
+  ).padStart(2, "0");
+  if (digitalClockDomUtc)
+    digitalClockDomUtc.innerText = `UTC: ${utc_h}:${utc_m}:${utc_s}`;
 
   // Other（選択されたオフセット）の計算と表示
-  const otherMillis = utcMillis + otherOffsetHours * 60 * 60 * 1000;
-  const otherNow = new Date(otherMillis);
-  const other_h = String(otherNow.getHours()).padStart(2, "0");
-  const other_m = String(otherNow.getMinutes()).padStart(2, "0");
-  const other_s = String(otherNow.getSeconds()).padStart(2, "0");
+  const other_h = String(nowOther.getHours()).padStart(2, "0");
+  const other_m = String(nowOther.getMinutes()).padStart(2, "0");
+  const other_s = String(nowOther.getSeconds()).padStart(2, "0");
   if (digitalClockDomOther) {
     digitalClockDomOther.innerText = `${cityLabel}: ${other_h}:${other_m}:${other_s}`;
   }
@@ -174,11 +226,21 @@ function applyDarkModeStyles(isDarkMode) {
   const textColor = isDarkMode ? "#FFFFFF" : "#000000";
   const backgroundColor = isDarkMode ? "#333333" : "#FFFFFF";
 
-  digitalClockDomJst.style.color = textColor;
-  digitalClockDomUtc.style.color = textColor;
-  digitalClockDomJst.style.backgroundColor = backgroundColor;
-  digitalClockDomUtc.style.backgroundColor = backgroundColor;
-  chartDom.style.backgroundColor = backgroundColor;
+  if (digitalClockDomJst) {
+    digitalClockDomJst.style.color = textColor;
+    digitalClockDomJst.style.backgroundColor = backgroundColor;
+  }
+  if (digitalClockDomUtc) {
+    digitalClockDomUtc.style.color = textColor;
+    digitalClockDomUtc.style.backgroundColor = backgroundColor;
+  }
+  if (digitalClockDomOther) {
+    digitalClockDomOther.style.color = textColor;
+    digitalClockDomOther.style.backgroundColor = backgroundColor;
+  }
+  if (chartDomJst) chartDomJst.style.backgroundColor = backgroundColor;
+  if (chartDomUtc) chartDomUtc.style.backgroundColor = backgroundColor;
+  if (chartDomOther) chartDomOther.style.backgroundColor = backgroundColor;
 }
 
 // 初期起動

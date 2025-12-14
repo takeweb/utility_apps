@@ -54,17 +54,21 @@ def plot_all_clocks_js_only(other_offset_hours=-8, city_label="L.A. (UTC-8)"):
         "CITY_LABEL_PLACEHOLDER", json.dumps(city_label, ensure_ascii=False)
     )
 
-    # layout: three time columns aligned horizontally, chart below
+    # layout: three time columns aligned horizontally, and three analog clocks below (JST / UTC / Other)
     html_code = (
         '<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>'
         + "\n"
         + '<div style="display:flex; gap:1rem; align-items:center; justify-content:space-around; margin-bottom:1rem;">'
-        + '<div id="digital_clock_display_jst" style="flex:1; text-align:center; font-family: "Consolas", "Menlo", "Monaco", monospace; font-size:1.1rem; padding:0.5rem;">JST: --:--:--</div>'
-        + '<div id="digital_clock_display_utc" style="flex:1; text-align:center; font-family: "Consolas", "Menlo", "Monaco", monospace; font-size:1.1rem; padding:0.5rem;">UTC: --:--:--</div>'
-        + '<div id="digital_clock_display_other" style="flex:1; text-align:center; font-family: "Consolas", "Menlo", "Monaco", monospace; font-size:1.1rem; padding:0.5rem;">Other: --:--:--</div>'
+        + '<div id="digital_clock_display_jst" style="flex:1; text-align:center; font-family: Consolas, Menlo, Monaco, monospace; font-size:1.1rem; padding:0.5rem;">JST: --:--:--</div>'
+        + '<div id="digital_clock_display_utc" style="flex:1; text-align:center; font-family: Consolas, Menlo, Monaco, monospace; font-size:1.1rem; padding:0.5rem;">UTC: --:--:--</div>'
+        + '<div id="digital_clock_display_other" style="flex:1; text-align:center; font-family: Consolas, Menlo, Monaco, monospace; font-size:1.1rem; padding:0.5rem;">Other: --:--:--</div>'
         + "</div>"
         + "\n"
-        + '<div id="analog_clock_chart" style="width:100%; height:400px;"></div>'
+        + '<div style="display:flex; gap:1rem; align-items:flex-start; justify-content:space-around; margin-bottom:1rem;">'
+        + '<div id="analog_clock_jst" style="flex:1; width:33%; height:300px;"></div>'
+        + '<div id="analog_clock_utc" style="flex:1; width:33%; height:300px;"></div>'
+        + '<div id="analog_clock_other" style="flex:1; width:33%; height:300px;"></div>'
+        + "</div>"
         + "\n\n"
         + "<script>"
         + js_content
