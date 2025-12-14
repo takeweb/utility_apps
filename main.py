@@ -51,6 +51,16 @@ def main():
         label="sin、cosと単位円の角度の関係はこちら",
         icon="⚪️",
     )
+    st.page_link(
+        "pages/13_tan_table.py",
+        label="tanと単位円の角度の関係はこちら",
+        icon="🔷",
+    )
+    st.page_link(
+        "pages/14_math_transforms.py",
+        label="対数・指数・平方根はこちら",
+        icon="📈",
+    )
 
     st.divider()  # 区切り線
 

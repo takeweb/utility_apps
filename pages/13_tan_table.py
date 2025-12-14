@@ -3,7 +3,7 @@ import pandas as pd
 from libs.tan_utils import build_tan_rows, highlight_row_func, render_slope_figure
 
 st.set_page_config(page_title="tan と角度の関係 (clean)", page_icon="📐")
-st.title("tan と角度の関係 — 傾き表示")
+st.title("🔷 tan と角度の関係 — 傾き表示")
 st.caption(
     "度(°) とラジアン、tan(θ) を 15°刻みで表示します。cos=0 の角度では tan は未定義になります。"
 )

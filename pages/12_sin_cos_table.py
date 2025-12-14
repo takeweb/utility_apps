@@ -4,7 +4,7 @@ import pandas as pd
 
 st.set_page_config(page_title="sin、cosと単位円の角度の関係", page_icon="⚪️")
 
-st.title("sin、cosと単位円の角度の関係")
+st.title("⚪️ sin、cosと単位円の角度の関係")
 st.caption("度(°) とラジアン、sin/cos、単位円上の座標を確認する表")
 
 # 設定エリア（上段にまとめる）
