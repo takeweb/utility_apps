@@ -18,7 +18,14 @@ if "highlight_angle_tan" not in st.session_state:
     st.session_state["highlight_angle_tan"] = 30
 
 angles = list(range(0, 361, step))
-st.selectbox("ハイライトする角度 (°)", options=angles, key="highlight_angle_tan")
+# スライダーで角度を選択（step に従う）
+st.slider(
+    "ハイライトする角度 (°)",
+    min_value=0,
+    max_value=360,
+    step=step,
+    key="highlight_angle_tan",
+)
 highlight_angle = int(st.session_state["highlight_angle_tan"])
 
 # 表示縮尺（視覚用）は 1 固定

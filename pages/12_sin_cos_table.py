@@ -19,15 +19,16 @@ show_exact = settings_cols[2].checkbox(
     help="主要角（15°刻み）の計算式で表示する（√や分数など）。チェックを外すと小数表示になります。",
 )
 
-# ハイライト角選択（step に連動）
-# session_state に既定値をセットしてから、selectbox は key のみ指定する（index と key を同時に渡すと警告の原因になる）
+# ハイライト角選択（step に連動） — セレクトボックスからスライダーに変更
+# session_state に既定値をセットしてから、slider は key のみ指定する
 if "highlight_angle" not in st.session_state:
     st.session_state["highlight_angle"] = 30
-angles_for_select = list(range(0, 361, step))
-# selectbox は session_state の値を使う（index を渡さない）
-st.selectbox(
+# スライダーで角度を選択（step に従う）
+st.slider(
     "ハイライトする角度 (°)",
-    options=angles_for_select,
+    min_value=0,
+    max_value=360,
+    step=step,
     key="highlight_angle",
 )
 highlight_angle = st.session_state["highlight_angle"]
@@ -156,9 +157,13 @@ try:
     ha = math.radians(highlight_angle)
     hx = math.cos(ha)
     hy = math.sin(ha)
+
+    # マーカーサイズは角度に依らず小さい一定値にする（赤い点を小さく統一）
+    s_mark = 30  # matplotlib scatter の s は面積 (points^2)
+    r_svg = 3  # SVG での円半径
     # 半径（原点から点へ）
     ax.plot([0, hx], [0, hy], color="#1f77b4", linewidth=2)
-    ax.scatter([hx], [hy], color="#d62728", zorder=5)
+    ax.scatter([hx], [hy], color="#d62728", zorder=5, s=s_mark)
 
     # 直角三角形の辺（x 軸への射影と垂直辺）を描画
     # 横辺: (0,0) -> (hx,0)
@@ -188,6 +193,14 @@ try:
     ax.set_aspect("equal", "box")
     ax.set_xlim(-1.1, 1.1)
     ax.set_ylim(-1.1, 1.1)
+    # 明示的にオートスケーリングを無効化して、角度変更時に表示領域が変わらないようにする
+    try:
+        ax.set_autoscale_on(False)
+    except Exception:
+        try:
+            ax.autoscale(False)
+        except Exception:
+            pass
     ax.set_xlabel("x = cosθ")
     ax.set_ylabel("y = sinθ")
     # タイトルは matplotlib に描画すると環境依存で文字化けすることがあるため
@@ -209,6 +222,9 @@ except Exception:
         hx = cx + r * math.cos(ha)
         hy = cy - r * math.sin(ha)
 
+        # SVG 側のマーカーサイズも一定にする（matplotlib と同じサイズ）
+        r_svg = 7
+
         svg = f'''<svg width="{size}" height="{size}" viewBox="0 0 {size} {size}" xmlns="http://www.w3.org/2000/svg">
         <rect width="100%" height="100%" fill="white" />
         <!-- circle -->
@@ -223,8 +239,8 @@ except Exception:
         <line x1="{hx:.3f}" y1="{cy}" x2="{hx:.3f}" y2="{hy:.3f}" stroke="#2ca02c" stroke-width="3" />
         <!-- fill triangle -->
         <polygon points="{cx},{cy} {hx:.3f},{cy} {hx:.3f},{hy:.3f}" fill="#2ca02c" fill-opacity="0.08" />
-        <!-- point -->
-        <circle cx="{hx:.3f}" cy="{hy:.3f}" r="6" fill="#d62728" />
+    <!-- point -->
+    <circle cx="{hx:.3f}" cy="{hy:.3f}" r="{r_svg:.3f}" fill="#d62728" />
         <!-- labels -->
         <text x="{cx + r + 8}" y="{cy}" font-size="12" fill="#333">x = cosθ</text>
         <text x="{cx}" y="{cy - r - 8}" font-size="12" fill="#333">y = sinθ</text>
