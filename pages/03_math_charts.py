@@ -4,6 +4,7 @@ import tools.math.sin as sin
 import tools.math.cos as cos
 import tools.math.tan as tan
 import tools.math.kaprekar as kaprekar
+import tools.math.polynomial as polynomial
 
 
 def main():
@@ -16,6 +17,12 @@ def main():
     tan.gen_arctangent_wave_chart()
     fibonacci.gen_chart()
     kaprekar.gen_chart()
+    # Add polynomial charts
+    polynomial.gen_linear_chart()
+    polynomial.gen_quadratic_chart()
+    polynomial.gen_cubic_chart()
+    polynomial.gen_quartic_chart()
+    polynomial.gen_quintic_chart()
 
 
 if __name__ == "__main__":
