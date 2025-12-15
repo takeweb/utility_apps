@@ -150,27 +150,42 @@ function updateAllClocks() {
   }
 
   // UTC clock
-  const nowUtc = new Date();
-  const hUtc = (nowUtc.getUTCHours() % 12) + nowUtc.getUTCMinutes() / 60;
-  const mUtc = nowUtc.getUTCMinutes() + nowUtc.getUTCSeconds() / 60;
-  const sUtc = nowUtc.getUTCSeconds();
+  function getUtcTime() {
+    const nowUtc = new Date();
+    const hUtc = (nowUtc.getUTCHours() % 12) + nowUtc.getUTCMinutes() / 60;
+    const mUtc = nowUtc.getUTCMinutes() + nowUtc.getUTCSeconds() / 60;
+    const sUtc = nowUtc.getUTCSeconds();
+    const utc_h = String(nowUtc.getUTCHours()).padStart(2, "0");
+    const utc_m = String(nowUtc.getUTCMinutes()).padStart(2, "0");
+    const utc_s = String(nowUtc.getUTCSeconds()).padStart(2, "0");
+    return {
+      hUtc,
+      mUtc,
+      sUtc,
+      utc_h,
+      utc_m,
+      utc_s,
+      unixMillis: nowUtc.getTime(),
+    };
+  }
+
+  const utcTime = getUtcTime();
   if (myChartUtc) {
     myChartUtc.setOption({
       series: [
         {},
-        { data: [{ value: hUtc }] },
-        { data: [{ value: mUtc }] },
-        { data: [{ value: sUtc }] },
+        { data: [{ value: utcTime.hUtc }] },
+        { data: [{ value: utcTime.mUtc }] },
+        { data: [{ value: utcTime.sUtc }] },
       ],
     });
   }
 
   // UTC digital display
-  const utc_h = String(nowUtc.getUTCHours()).padStart(2, "0");
-  const utc_m = String(nowUtc.getUTCMinutes()).padStart(2, "0");
-  const utc_s = String(nowUtc.getUTCSeconds()).padStart(2, "0");
   if (digitalClockDomUtc)
-    digitalClockDomUtc.innerText = `UTC: ${utc_h}:${utc_m}:${utc_s}`;
+    digitalClockDomUtc.innerHTML = `UTC: ${utcTime.utc_h}:${utcTime.utc_m}:${
+      utcTime.utc_s
+    }<br>UNIX Time: ${Math.floor(utcTime.unixMillis / 1000)}`;
 
   // Other clock (selected offset)
   const otherMillis = utcMillis + otherOffsetHours * 60 * 60 * 1000;
