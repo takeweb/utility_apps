@@ -150,10 +150,10 @@ function updateAllClocks() {
   }
 
   // UTC clock
-  const nowUtc = new Date(utcMillis);
-  const hUtc = (nowUtc.getHours() % 12) + nowUtc.getMinutes() / 60;
-  const mUtc = nowUtc.getMinutes() + nowUtc.getSeconds() / 60;
-  const sUtc = nowUtc.getSeconds();
+  const nowUtc = new Date();
+  const hUtc = (nowUtc.getUTCHours() % 12) + nowUtc.getUTCMinutes() / 60;
+  const mUtc = nowUtc.getUTCMinutes() + nowUtc.getUTCSeconds() / 60;
+  const sUtc = nowUtc.getUTCSeconds();
   if (myChartUtc) {
     myChartUtc.setOption({
       series: [
@@ -164,6 +164,13 @@ function updateAllClocks() {
       ],
     });
   }
+
+  // UTC digital display
+  const utc_h = String(nowUtc.getUTCHours()).padStart(2, "0");
+  const utc_m = String(nowUtc.getUTCMinutes()).padStart(2, "0");
+  const utc_s = String(nowUtc.getUTCSeconds()).padStart(2, "0");
+  if (digitalClockDomUtc)
+    digitalClockDomUtc.innerText = `UTC: ${utc_h}:${utc_m}:${utc_s}`;
 
   // Other clock (selected offset)
   const otherMillis = utcMillis + otherOffsetHours * 60 * 60 * 1000;
@@ -188,19 +195,6 @@ function updateAllClocks() {
   const digital_s = String(nowJst.getSeconds()).padStart(2, "0");
   if (digitalClockDomJst)
     digitalClockDomJst.innerText = `JST(UTC+9): ${digital_h}:${digital_m}:${digital_s}`;
-
-  // UTC 表示
-  const utc_h = String(
-    nowUtc.getUTCHours ? nowUtc.getUTCHours() : nowUtc.getHours()
-  ).padStart(2, "0");
-  const utc_m = String(
-    nowUtc.getUTCMinutes ? nowUtc.getUTCMinutes() : nowUtc.getMinutes()
-  ).padStart(2, "0");
-  const utc_s = String(
-    nowUtc.getUTCSeconds ? nowUtc.getUTCSeconds() : nowUtc.getSeconds()
-  ).padStart(2, "0");
-  if (digitalClockDomUtc)
-    digitalClockDomUtc.innerText = `UTC: ${utc_h}:${utc_m}:${utc_s}`;
 
   // Other（選択されたオフセット）の計算と表示
   const other_h = String(nowOther.getHours()).padStart(2, "0");
