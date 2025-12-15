@@ -9,6 +9,7 @@ from libs.supabase_client import get_supabase_client
 from tools.wareki import convert_seireki_2_wareki
 import os
 import json
+import jpholiday
 
 
 def get_tz_time(tz_str):
@@ -109,7 +110,11 @@ def print_date(supabase: Client):
     }
     wamei = month_wamei.get(today.month, "")
 
-    formatted_japanese_date = f"{wareki_year}年 {wamei} {rokuyo}"
+    # 日本の祝日判定
+    holiday_name = jpholiday.is_holiday_name(today)
+    holiday_text = f" ({holiday_name})" if holiday_name else ""
+
+    formatted_japanese_date = f"{wareki_year}年 {wamei} {rokuyo} {holiday_text}"
 
     col1, col2 = st.columns([3, 2])
     col1.subheader(formatted_standard_date)
