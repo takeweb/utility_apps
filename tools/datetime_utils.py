@@ -41,3 +41,55 @@ def get_month_wamei(month):
         12: "師走",
     }
     return month_wamei.get(month, "")
+
+
+def format_us_date(dt):
+    weekday_en = [
+        "Mon",
+        "Tue",
+        "Wed",
+        "Thu",
+        "Fri",
+        "Sat",
+        "Sun",
+    ]
+    month_en = [
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December",
+    ]
+
+    return f"{weekday_en[dt.weekday()]}, {month_en[dt.month - 1]} {dt.day}, {dt.year}"
+
+
+def get_zyunisi(year: int) -> str:
+    """
+    指定された年の十二支を取得する関数。
+    :param year: 西暦年
+    :return: 十二支（文字列）
+    """
+    zyunisi_list = [
+        "子",
+        "丑",
+        "寅",
+        "卯",
+        "辰",
+        "巳",
+        "午",
+        "未",
+        "申",
+        "酉",
+        "戌",
+        "亥",
+    ]
+    index = (year - 4) % 12  # 子年が 4 の年に対応
+    return zyunisi_list[index]

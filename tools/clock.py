@@ -10,7 +10,12 @@ import jpholiday
 
 from libs.supabase_client import get_supabase_client
 from tools.wareki import convert_seireki_2_wareki
-from tools.datetime_utils import calculate_rokuyo, get_month_wamei
+from tools.datetime_utils import (
+    calculate_rokuyo,
+    get_month_wamei,
+    format_us_date,
+    get_zyunisi,
+)
 
 
 def plot_all_clocks_js_only(other_offset_hours=-8, city_label="L.A. (UTC-8)"):
@@ -82,11 +87,23 @@ def print_date(supabase: Client):
     holiday_name = jpholiday.is_holiday_name(today)
     holiday_text = f" ({holiday_name})" if holiday_name else ""
 
-    formatted_japanese_date = f"{wareki_year}年 {wamei} {rokuyo} {holiday_text}"
+    # 十二支を取得
+    zyunisi = get_zyunisi(today.year)
 
-    col1, col2 = st.columns([3, 2])
-    col1.subheader(formatted_standard_date)
-    col2.subheader(formatted_japanese_date)
+    formatted_japanese_date = (
+        f"{wareki_year}年・{zyunisi} {wamei} {rokuyo} {holiday_text}"
+    )
+
+    # アメリカ表記の日付（曜日をフルスペル、月を除外）
+    formatted_american_date = format_us_date(today)
+
+    st.header(formatted_standard_date)
+
+    col1, col2 = st.columns(2)
+    col1.subheader(formatted_japanese_date)
+
+    # アメリカ表記の日付を表示
+    col2.subheader(formatted_american_date)
 
 
 def draw_clock():
