@@ -1,6 +1,7 @@
 import streamlit as st
 import streamlit.components.v1 as components
 from datetime import datetime
+from zoneinfo import ZoneInfo
 import locale
 from supabase import Client
 import os
@@ -62,7 +63,7 @@ def plot_all_clocks_js_only(other_offset_hours=-8, city_label="L.A. (UTC-8)"):
 
 def print_date(supabase: Client):
     locale.setlocale(locale.LC_TIME, "ja_JP.UTF-8")
-    today = datetime.today()
+    today = datetime.now(ZoneInfo("Asia/Tokyo"))
 
     # 標準の日付表示
     formatted_standard_date = today.strftime("%Y年%m月%d日(%a)")
